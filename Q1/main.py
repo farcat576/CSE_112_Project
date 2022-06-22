@@ -20,7 +20,10 @@ var_init = filter(lambda x: x[:3]=='var' and len(x.split())==2,data)
 lim=len(data)
 var_dict={var_init[i][4]:str(lim+i) for i in range(len(var_init))}
 
+label_init = [(data[i],i) for i in range(len(data)) if data[i][-1]==':' and len(data[i].split())==1 ]
+label_dict={label_init[i][0][:-1]:str(label_init[i][1]) for i in range(len(var_init))}
 
+out=[]
  for line in data:
      line = line.split()
      if line[0] in opcode:
@@ -37,17 +40,17 @@ var_dict={var_init[i][4]:str(lim+i) for i in range(len(var_init))}
                     type = "C"
             else:
                 if type == "A":
-                    assert type_A(line)
+                    assert check_A(line)
                 elif type == "B":
-                    assert type_B(line)
+                    assert check_B(line)
                 elif type == "C":
-                    assert type_C(line)
+                    assert check_C(line)
                 elif type == "D":
-                    assert type_D(line)
+                    assert check_D(line)
                 elif type == "E":
-                    assert type_E(line)
+                    assert check_E(line)
                 else:
-                    assert type_F(line)
+                    assert check_F(line)
 #
 
 
