@@ -16,10 +16,10 @@ opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":"10010", "ld":["10100"
 
 
 
-for line in data:
-    line = line.split()
-    if line[0] in opcode:
-
+# for line in data:
+#     line = line.split()
+#     if line[0] in opcode:
+#
 
 
 
