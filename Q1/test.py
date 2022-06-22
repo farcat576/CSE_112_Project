@@ -8,3 +8,21 @@ def type_E(reg1,memory):
 
 def halt():
     return '010100000000000'
+
+def reg_check(register):
+    if register in reg:
+        return 1
+    else:
+        return 0
+
+def imm_check(imm):
+    if imm>=0 and imm<256 and imm.isdigit():
+        return 1
+    else:
+        return 0
+
+def flags_check(register):
+    if register == "FLAGS":
+        return 1
+    else:
+        return 0
