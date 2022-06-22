@@ -29,7 +29,7 @@ opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":["1001",""], "ld":["10
                 if imm_check(line[2]):
                     op += "0"
                     type = B
-                if reg_check(line[2]):
+                if reg_check(line[2]) or flags_check(line[2]):
                     op += "1"
                     type = C
             else:
