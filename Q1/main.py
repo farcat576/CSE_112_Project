@@ -16,6 +16,9 @@ opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":["1001",""], "ld":["10
         "not":["11101","C"],"cmp":["11110","C"],"jmp":["11111","E"],"jlt":["01100","E"],
         "jgt":["01101","E"],"je":["01111","E"],"hlt":["01010","F"]}
 
+var_init = filter(lambda x: x[:3]=='var' and len(x.split())==2,data)
+lim=len(data)
+var_dict={var_init[i][4]:str(lim+i) for i in range(len(var_init))}
 
 
  for line in data:
@@ -28,11 +31,23 @@ opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":["1001",""], "ld":["10
                 assert reg_check(line[1])
                 if imm_check(line[2]):
                     op += "0"
-                    type = B
+                    type = "B"
                 if reg_check(line[2]) or flags_check(line[2]):
                     op += "1"
-                    type = C
+                    type = "C"
             else:
+                if type == "A":
+                    assert type_A(line)
+                elif type == "B":
+                    assert type_B(line)
+                elif type == "C":
+                    assert type_C(line)
+                elif type == "D":
+                    assert type_D(line)
+                elif type == "E":
+                    assert type_E(line)
+                else:
+                    assert type_F(line)
 #
 
 
