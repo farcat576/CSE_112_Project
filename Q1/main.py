@@ -52,6 +52,11 @@ out=[]
                 else:
                     assert check_F(line)
 #
+#Check var and label again
+#Fix binary string widths
+#Mix all code together
+#Change parameters of writing parts
+#Handle asserts
 
 
 
