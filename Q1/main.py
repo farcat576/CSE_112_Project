@@ -10,7 +10,7 @@ assert len(commands) <= 256, "Too many instructions!"
 
 #assertion statements for each instruction
 #mov + last bit later
-opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":"10010", "ld":["10100","D"],
+opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":["1001",""], "ld":["10100","D"],
         "st":["10101","D"],"mul":["10110","A"],"div":["10111","C"],"rs":["11000","B"],
         "ls":["11001","B"],"xor":["11010","A"],"or":["11011","A"],"and":["11100","A"],
         "not":["11101","C"],"cmp":["11110","C"],"jmp":["11111","E"],"jlt":["01100","E"],
@@ -18,9 +18,21 @@ opcode = {"add":["10000",'A'], "sub":["10001","A"], "mov":"10010", "ld":["10100"
 
 
 
-# for line in data:
-#     line = line.split()
-#     if line[0] in opcode:
+ for line in data:
+     line = line.split()
+     if line[0] in opcode:
+            op = opcode[line[0]][0]
+            type = opcode[line[0]][1]
+            if op == "1001":
+                assert len(line) == 3
+                assert reg_check(line[1])
+                if imm_check(line[2]):
+                    op += "0"
+                    type = B
+                if reg_check(line[2]):
+                    op += "1"
+                    type = C
+            else:
 #
 
 
