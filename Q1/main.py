@@ -23,34 +23,48 @@ var_dict={var_init[i][4]:str(lim+i) for i in range(len(var_init))}
 label_init = [(data[i],i) for i in range(len(data)) if data[i][-1]==':' and len(data[i].split())==1 ]
 label_dict={label_init[i][0][:-1]:str(label_init[i][1]) for i in range(len(var_init))}
 
-out=[]
- for line in data:
-     line = line.split()
-     if line[0] in opcode:
-            op = opcode[line[0]][0]
-            type = opcode[line[0]][1]
-            if op == "1001":
-                assert len(line) == 3
-                assert reg_check(line[1])
-                if imm_check(line[2]):
-                    op += "0"
-                    type = "B"
-                if reg_check(line[2]) or flags_check(line[2]):
-                    op += "1"
-                    type = "C"
+L=[]
+for line in data:
+    line = line.split()
+    if line[0] in opcode:
+        op = opcode[line[0]][0]
+        type = opcode[line[0]][1]
+        if op == "1001":
+            assert len(line) == 3
+            assert reg_check(line[1])
+            if imm_check(line[2]):
+                op += "0"
+                type = "B"
+            if reg_check(line[2]) or flags_check(line[2]):
+                op += "1"
+                type = "C"
+        else:
+            if type == "A":
+                assert check_A(line)
+            elif type == "B":
+                assert check_B(line)
+            elif type == "C":
+                assert check_C(line)
+            elif type == "D":
+                assert check_D(line)
+            elif type == "E":
+                assert check_E(line)
             else:
-                if type == "A":
-                    assert check_A(line)
-                elif type == "B":
-                    assert check_B(line)
-                elif type == "C":
-                    assert check_C(line)
-                elif type == "D":
-                    assert check_D(line)
-                elif type == "E":
-                    assert check_E(line)
-                else:
-                    assert check_F(line)
+                assert check_F(line)
+        if type == "A":
+            L.append(op +  type_A(line))
+        elif type == "B":
+            L.append(op +  type_B(line))
+        elif type == "C":
+            L.append(op +  type_C(line))
+        elif type == "D":
+            L.append(op +  type_D(line))
+        elif type == "E":
+            L.append(op +  type_E(line))
+        else:
+            L.append(op +  halt())
+with open('binary.txt' ,'w') as f:
+    f.write(L)
 #
 #Check var and label again
 #Fix binary string widths
