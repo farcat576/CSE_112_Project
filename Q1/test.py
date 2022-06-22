@@ -5,3 +5,6 @@ def type_D(reg1,memory):
 
 def type_E(reg1,memory):
     return reg[reg1] + bin(memory)[2:]
+
+def halt():
+    return '010100000000000'
