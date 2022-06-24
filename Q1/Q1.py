@@ -26,7 +26,7 @@ def type_A(reg1, reg2, reg3):
 
 
 def type_B(reg1, imm):
-    return reg[reg1] + bin(int(imm))[2:]
+    return reg[reg1] + bin(int(imm))[2:].rjust(8,'0')
 
 
 def type_C(reg1, reg2):
@@ -42,7 +42,7 @@ def type_E(memory):
 
 
 def halt():
-    return '0000000000'
+    return '00000000000'
 
 
 # Helper functions for checking instruction parts
@@ -148,9 +148,6 @@ def parse(data):
 # err_init =filter(lambda x: (x not in var_init) and (x not in label_init) and (x not in label_init),data)
 # assert len(err_init) == 0
 var_dict,label_dict,op_dict= parse(data)
-print(var_dict)
-print(label_dict)
-print(op_dict)
 
 L = []
 for num in op_dict:
@@ -161,7 +158,7 @@ for num in op_dict:
     if op == "1001":
         assert len(line) == 3
         assert reg_check(line[1])
-        if imm_check(line[2]):
+        if imm_check(line[2][1:]):
             op += "0"
             type = "B"
             L.append(op + type_B(line[1], line[2][1:]))
@@ -192,7 +189,3 @@ for num in op_dict:
 with open('binary.txt', 'w') as f:
     for i in L:
         f.write(i + '\n')
-
-#
-# Check var and label again
-# Handle asserts
