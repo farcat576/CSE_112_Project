@@ -25,115 +25,107 @@ def type_B(reg1,imm):
     return reg[reg1]+bin(int(imm))[2:]
 
 def type_C(reg1,reg2):
-    return '00000'+reg[reg1]+reg[2]
+    return '00000'+reg[reg1]+reg[reg2]
 
 def type_D(reg1,memory):
-    return reg[reg1] + bin(memory)[2:]
+    return reg[reg1] + var_dict[memory]
 
-def type_E(reg1,memory):
-    return reg[reg1] + bin(memory)[2:]
+def type_E(memory):
+    return '000' + label_dict[memory]
 
 def halt():
-    return '010100000000000'
+    return '0000000000'
 
 def reg_check(register):
-    if register in reg:
-        return 1
-    else:
-        return 0
+    return register in reg
 
 def imm_check(imm):
-    if imm>=0 and imm<256 and imm.isdigit():
-        return 1
+    if imm.isdigit():
+        return int(imm)>=0 and int(imm)<256
     else:
         return 0
 
 def flags_check(register):
-    if register == "FLAGS":
-        return 1
-    else:
-        return 0
+    return register == "FLAGS":
 
-def type_A(line):
+def A_check(line):
     if len(line) != 4:
         return 0
-    for i in line[1:]:
-        if i not in valid_registers:
-            return 0
-    return 1
+    return (line[1] in reg) and (line[2] in reg) and (line[3] in reg)
 
 
-def type_B(line):
+def B_check(line):
     if len(line) != 3:
         return 0
-    if line[1] not in valid_registers:
-        return 0
-    if int(line[2][1:]) > 256:
-        return 0
+    return reg_check(line[1]) and imm_check(len[2])
 
-    return 1
-
-def type_C(line):
+def C_check(line):
     if len(line) != 3:
         return 0
-    for i in line[1:]:
-        if i not in valid_registers:
-            return 0
-    return 1
+    return reg_check(line[1]) and reg_check(line[2])
 
-
-def type_F(line):
-    if len(line) != 1:
+def D_check(line):
+    if len(line) != 3:
         return 0
-    return 1
+    return reg_check(line[1]) and (line[2] in var_dict)
 
-var_init = filter(lambda x: x[:3]=='var' and len(x.split())==2,data)
+def E_check(line):
+    if len(line) != 2:
+        return 0
+    return reg_check(line[1])
+
+def F_check(line):
+    return line==["hlt"]
+
+var_init = filter(lambda x: x[:-1]=='var ' and len(x.split())==2,data)
 lim=len(data)
 var_dict={var_init[i][4]:str(lim+i) for i in range(len(var_init))}
 
-label_init = [(data[i],i) for i in range(len(data)) if data[i][-1]==':' and len(data[i].split())==1 ]
-label_dict={label_init[i][0][:-1]:str(label_init[i][1]) for i in range(len(var_init))}
+label_trav = [(data[i],i) for i in range(len(data)) if data[i][-1]==':' and len(data[i].split())==1]
+label_init= [elem[0] for elem in label_trav]
+label_dict={label_init[i][0][:-1]:str(label_init[i][1]) for i in range(len(label_trav))}
+
+op_init = filter(lambda x: x.split()[0] in opcode,data)
+
+err_init =filter(lambda x: (x not in var_init) and (x not in label_init) and (x not in label_init),data)
+assert len(err_init) == 0
 
 L=[]
-for line in data:
+for line in op_init:
     line = line.split()
-    if line[0] in opcode:
-        op = opcode[line[0]][0]
-        type = opcode[line[0]][1]
-        if op == "1001":
-            assert len(line) == 3
-            assert reg_check(line[1])
-            if imm_check(line[2]):
-                op += "0"
-                type = "B"
-            if reg_check(line[2]) or flags_check(line[2]):
-                op += "1"
-                type = "C"
-        else:
-            if type == "A":
-                assert check_A(line)
-            elif type == "B":
-                assert check_B(line)
-            elif type == "C":
-                assert check_C(line)
-            elif type == "D":
-                assert check_D(line)
-            elif type == "E":
-                assert check_E(line)
-            else:
-                assert check_F(line)
+    op = opcode[line[0]][0]
+    type = opcode[line[0]][1]
+    if op == "1001":
+        assert len(line) == 3
+        assert reg_check(line[1])
+        if imm_check(line[2]):
+            op += "0"
+            type = "B"
+            L.append(op +  type_B(line[1],line[2][1:]))
+        if reg_check(line[2]) or flags_check(line[2]):
+            op += "1"
+            type = "C"
+            L.append(op +  type_C(line[1],line[2]))
+    else:
         if type == "A":
-            L.append(op +  type_A(line))
+            assert A_check(line)
+            L.append(op +  type_A(line[1],line[2],line[3]))
         elif type == "B":
-            L.append(op +  type_B(line))
+            assert B_check(line)
+            L.append(op +  type_B(line[1],line[2][1:]))
         elif type == "C":
-            L.append(op +  type_C(line))
+            assert C_check(line)
+            L.append(op +  type_C(line[1],line[2]))
         elif type == "D":
-            L.append(op +  type_D(line))
+            assert D_check(line)
+            L.append(op +  type_D(line[1],line[2]))
         elif type == "E":
-            L.append(op +  type_E(line))
+            assert E_check(line)
+            L.append(op +  type_E(line[1]))
         else:
+            assert F_check(line)
             L.append(op +  halt())
+
 with open('binary.txt' ,'w') as f:
     f.write(L)
 #
