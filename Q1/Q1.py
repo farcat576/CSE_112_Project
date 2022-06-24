@@ -102,14 +102,19 @@ def parse(data):
     for i in range(lim):
         line=data[i]
         if (len(line)==2 and line[0]=="var"):
+            assert var_start == True
             var_dict[line[1]]=bin(lim)[2:].rjust(8,'0')
             lim+=1
         elif (len(line)==1 and line[-1][-1]==":"):
-            label_dict[line[-1][:-1]=bin(lim)[2:].rjust(8,'0')
+            label_dict[line[-1][:-1]=bin(i)[2:].rjust(8,'0')
+            var_start = False
         elif (line[0] in opcode):
             op_dict[str(i)]=line
+            var_start = False
         else:
             err_dict[str(i)]=" ".join(line)
+            var_start = False
+    assert len(err_dict) == 0
                        
     return var_dict,label_dict,op_dict
             
