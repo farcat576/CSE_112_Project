@@ -1,0 +1,3 @@
+Var X
+jmp X
+hlt

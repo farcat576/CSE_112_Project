@@ -1,0 +1,3 @@
+ld R0 dummylabel 
+dummylabel:
+hlt
