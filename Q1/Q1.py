@@ -190,7 +190,9 @@ for num in op_dict:
             L.append(op + halt())
 
 with open('binary.txt', 'w') as f:
-    f.writelines(L)
+    for i in L:
+        f.write(i + '\n')
+
 #
 # Check var and label again
 # Handle asserts
