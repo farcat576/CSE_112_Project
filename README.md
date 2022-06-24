@@ -16,4 +16,5 @@ The instructions are then checked for proper syntax.
 > The rest of the instructions are checked for their particular syntax as per their type (A, B, C, D, E, F)   
 > If the instruction's syntax is correct, we construct the binary command for the instruction as a string and add it to a list of the gathered instructions in machine code.   
 > Otherwise, the error message is printed and the assembling process is halted.   
-The assembler then writes the final binary machine code in a text file called `binary.txt`. This is the output of the assembler.
+The assembler then writes the final binary machine code in a text file called `binary.txt`.   
+This is the output of the assembler.
