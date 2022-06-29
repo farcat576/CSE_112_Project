@@ -8,6 +8,7 @@ assert len(commands) <= 256, "Too many instructions!"
 
 # assertion statements for each instruction
 # mov + last bit later
+L=[]
 
 # Opcode mapping
 opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld": ["10100", "D"],
@@ -165,44 +166,44 @@ def parse(data):
 
 # err_init =filter(lambda x: (x not in var_init) and (x not in label_init) and (x not in label_init),data)
 # assert len(err_init) == 0
-var_dict,label_dict,op_dict= parse(data)
-
-L = []
-for num in op_dict:
-    line=op_dict[num]
-    oper = line[0]
-    op = opcode[oper][0]
-    type = opcode[oper][1]
-    if op == "1001":
-        assert len(line) == 3
-        assert reg_check(line[1])
-        if imm_check(line[2]):
-            op += "0"
-            type = "B"
-            L.append(op + type_B(line[1], line[2][1:]))
-        if reg_check(line[2]) or flags_check(line[2]):
-            op += "1"
-            type = "C"
-            L.append(op + type_C(line[1], line[2]))
-    else:
-        if type == "A":
-            assert A_check(line)
-            L.append(op + type_A(line[1], line[2], line[3]))
-        elif type == "B":
-            assert B_check(line)
-            L.append(op + type_B(line[1], line[2][1:]))
-        elif type == "C":
-            assert C_check(line)
-            L.append(op + type_C(line[1], line[2]))
-        elif type == "D":
-            assert D_check(line)
-            L.append(op + type_D(line[1], line[2]))
-        elif type == "E":
-            assert E_check(line)
-            L.append(op + type_E(line[1]))
+def main():
+    var_dict,label_dict,op_dict= parse(data)
+    
+    for num in op_dict:
+        line=op_dict[num]
+        oper = line[0]
+        op = opcode[oper][0]
+        type = opcode[oper][1]
+        if op == "1001":
+            assert len(line) == 3
+            assert reg_check(line[1])
+            if imm_check(line[2]):
+                op += "0"
+                type = "B"
+                L.append(op + type_B(line[1], line[2][1:]))
+            if reg_check(line[2]) or flags_check(line[2]):
+                op += "1"
+                type = "C"
+                L.append(op + type_C(line[1], line[2]))
         else:
-            #assert F_check(op)
-            L.append(op + halt())
+            if type == "A":
+                assert A_check(line)
+                L.append(op + type_A(line[1], line[2], line[3]))
+            elif type == "B":
+                assert B_check(line)
+                L.append(op + type_B(line[1], line[2][1:]))
+            elif type == "C":
+                assert C_check(line)
+                L.append(op + type_C(line[1], line[2]))
+            elif type == "D":
+                assert D_check(line)
+                L.append(op + type_D(line[1], line[2]))
+            elif type == "E":
+                assert E_check(line)
+                L.append(op + type_E(line[1]))
+            else:
+                #assert F_check(op)
+                L.append(op + halt())
 
 with open('binary.txt', 'w') as f:
     for i in L:
