@@ -8,9 +8,6 @@ with open("q1testcase.txt", 'r') as f:
 assert commands.index("hlt") == len(commands) - 1, "Last command is not hlt"
 assert len(commands) <= 256, "Too many instructions!"
 
-# assertion statements for each instruction
-# mov + last bit later
-L = []
 #out = open('binary.txt',"w")
 # Opcode mapping
 opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld": ["10100", "D"],
@@ -156,6 +153,7 @@ def parse(data):
 
 def process():
     var_dict, label_dict, op_dict = parse(data)
+    L = []
 
     for num in op_dict:
         line = op_dict[num]
