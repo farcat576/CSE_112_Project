@@ -117,7 +117,9 @@ def parse(data):
 
     for i in range(lim):
         line = data[i]
-        if (len(line) == 2 and line[0] == "var"):
+        if line==[]:
+            pass
+        elif (len(line) == 2 and line[0] == "var"):
             assert var_start == True
             var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
             lim += 1
