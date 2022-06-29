@@ -3,7 +3,7 @@ with open("q1testcase.txt", 'r') as f:
     commands = [data[i].strip() for i in range(len(data))]
 
 # assertion statements for hlt and length of input file
-assert commands.index("hlt")==len(commands)-1, "Last command is not hlt"
+assert commands.index("hlt")==len(commands) - 1, "Last command is not hlt"
 assert len(commands) <= 256, "Too many instructions!"
 
 # assertion statements for each instruction
@@ -51,8 +51,8 @@ def reg_check(register):
 
 
 def imm_check(imm):
-    if imm.isdigit():
-        return int(imm) >= 0 and int(imm) < 256
+    if imm[0]=='#' and imm[1:].isdigit():
+        return int(imm[1:]) >= 0 and int(imm[1:]) < 256
     else:
         return 0
 
@@ -160,7 +160,7 @@ for num in op_dict:
     if op == "1001":
         assert len(line) == 3
         assert reg_check(line[1])
-        if imm_check(line[2][1:]):
+        if imm_check(line[2]):
             op += "0"
             type = "B"
             L.append(op + type_B(line[1], line[2][1:]))
