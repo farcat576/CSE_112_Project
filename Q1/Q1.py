@@ -123,8 +123,13 @@ def parse(data):
             assert var_start == True
             var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
             lim += 1
-        elif (len(line) == 1 and line[-1][-1] == ":"):
-            label_dict[line[-1][:-1]] = bin(i)[2:].rjust(8, '0')
+        elif (line[0][-1] == ":"):
+            label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
+            line=line[1:]
+            if (line[0] in opcode):
+                op_dict[str(i)] = line
+            else:
+                err_dict[str(i)] = " ".join(line)
             var_start = False
         elif (line[0] in opcode):
             op_dict[str(i)] = line
