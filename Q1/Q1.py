@@ -197,7 +197,10 @@ def process():
 def main():
     L = process()
     with open('binary.txt', 'w') as f:
-        for i in L:
-            f.write(i + '\n')
+        for i in range(len(L)-1):
+            f.write(L[i] + '\n')
+
+        f.write(L[len(L)-1])
+
 
 main()
