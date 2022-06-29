@@ -16,6 +16,17 @@ opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld
           "not": ["11101", "C"], "cmp": ["11110", "C"], "jmp": ["11111", "E"], "jlt": ["01100", "E"],
           "jgt": ["01101", "E"], "je": ["01111", "E"], "hlt": ["01010", "F"]}
 
+error_dict = {"101":"More than one hlt statement found.","102":"Last instruction is not hlt.",
+              "103":"Too many instructions given.","201":"Register not found",
+              "202":"Immediate value format not recognised","203":"Illegal use of FLAGS register detected.",
+              "204":"Syntax Error.","301":"Variable not defined",
+              "302":"Variable not defined at the beginning","303":"Label not found.",
+              "304":"Syntax error in use of variable.","305":"Syntax error in use of label.",
+              "306":"Variable used as label.","307":"Label used as variable."
+              }
+error_message = " Assembling halted."
+
+
 # Register mapping
 reg = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110', 'FLAGS': '111'}
 
