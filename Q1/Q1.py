@@ -3,7 +3,7 @@ with open("q1testcase.txt", 'r') as f:
     commands = [data[i].strip() for i in range(len(data))]
 
 # assertion statements for hlt and length of input file
-assert commands[len(commands) - 1] == "hlt", "Last command is not hlt"
+assert commands.index("hlt")==len(commands)-1, "Last command is not hlt"
 assert len(commands) <= 256, "Too many instructions!"
 
 # assertion statements for each instruction
