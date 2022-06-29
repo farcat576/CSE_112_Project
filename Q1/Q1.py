@@ -1,15 +1,17 @@
+import sys
+
 with open("q1testcase.txt", 'r') as f:
     data = f.readlines()
     commands = [data[i].strip() for i in range(len(data))]
 
 # assertion statements for hlt and length of input file
-assert commands.index("hlt")==len(commands) - 1, "Last command is not hlt"
+assert commands.index("hlt") == len(commands) - 1, "Last command is not hlt"
 assert len(commands) <= 256, "Too many instructions!"
 
 # assertion statements for each instruction
 # mov + last bit later
-L=[]
-
+L = []
+#out = open('binary.txt',"w")
 # Opcode mapping
 opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld": ["10100", "D"],
           "st": ["10101", "D"], "mul": ["10110", "A"], "div": ["10111", "C"], "rs": ["11000", "B"],
@@ -17,16 +19,15 @@ opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld
           "not": ["11101", "C"], "cmp": ["11110", "C"], "jmp": ["11111", "E"], "jlt": ["01100", "E"],
           "jgt": ["01101", "E"], "je": ["01111", "E"], "hlt": ["01010", "F"]}
 
-error_dict = {"101":"More than one hlt statement found.","102":"Last instruction is not hlt.",
-              "103":"Too many instructions given.","201":"Register not found",
-              "202":"Immediate value format not recognised","203":"Illegal use of FLAGS register detected.",
-              "204":"Syntax Error.","301":"Variable not defined",
-              "302":"Variable not defined at the beginning","303":"Label not found.",
-              "304":"Syntax error in use of variable.","305":"Syntax error in use of label.",
-              "306":"Variable used as label.","307":"Label used as variable."
+error_dict = {"101": "More than one hlt statement found.", "102": "Last instruction is not hlt.",
+              "103": "Too many instructions given.", "201": "Register not found",
+              "202": "Immediate value format not recognised", "203": "Illegal use of FLAGS register detected.",
+              "204": "Syntax Error.", "301": "Variable not defined",
+              "302": "Variable not defined at the beginning", "303": "Label not found.",
+              "304": "Syntax error in use of variable.", "305": "Syntax error in use of label.",
+              "306": "Variable used as label.", "307": "Label used as variable."
               }
 error_message = " Assembling halted."
-
 
 # Register mapping
 reg = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110', 'FLAGS': '111'}
@@ -38,18 +39,18 @@ def type_A(reg1, reg2, reg3):
 
 
 def type_B(reg1, imm):
-    return reg[reg1] + bin(int(imm))[2:].rjust(8,'0')
+    return reg[reg1] + bin(int(imm))[2:].rjust(8, '0')
 
 
 def type_C(reg1, reg2):
     return '00000' + reg[reg1] + reg[reg2]
 
 
-def type_D(reg1, memory):
+def type_D(reg1, memory,var_dict):
     return reg[reg1] + var_dict[memory]
 
 
-def type_E(memory):
+def type_E(memory,label_dict):
     return '000' + label_dict[memory]
 
 
@@ -63,7 +64,7 @@ def reg_check(register):
 
 
 def imm_check(imm):
-    if imm[0]=='#' and imm[1:].isdigit():
+    if imm[0] == '$' and imm[1:].isdigit():
         return int(imm[1:]) >= 0 and int(imm[1:]) < 256
     else:
         return 0
@@ -73,11 +74,11 @@ def flags_check(register):
     return register == "FLAGS"
 
 
-def var_check(var):
+def var_check(var,var_dict):
     return var in var_dict
 
 
-def label_check(lab):
+def label_check(lab,label_dict):
     return lab in label_dict
 
 
@@ -100,16 +101,16 @@ def C_check(line):
     return reg_check(line[1]) and reg_check(line[2])
 
 
-def D_check(line):
+def D_check(line,var_dict):
     if len(line) != 3:
         return 0
-    return reg_check(line[1]) and var_check(line[2])
+    return reg_check(line[1]) and var_check(line[2],var_dict)
 
 
-def E_check(line):
+def E_check(line,label_dict):
     if len(line) != 2:
         return 0
-    return label_check(line[1])
+    return label_check(line[1],label_dict)
 
 
 def F_check(line):
@@ -129,7 +130,7 @@ def parse(data):
 
     for i in range(lim):
         line = data[i]
-        if line==[]:
+        if line == []:
             pass
         elif (len(line) == 2 and line[0] == "var"):
             assert var_start == True
@@ -137,7 +138,7 @@ def parse(data):
             lim += 1
         elif (line[0][-1] == ":"):
             label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
-            line=line[1:]
+            line = line[1:]
             if (line[0] in opcode):
                 op_dict[str(i)] = line
             else:
@@ -153,27 +154,15 @@ def parse(data):
     assert len(err_dict) == 0
     return var_dict, label_dict, op_dict
 
+def process():
+    var_dict, label_dict, op_dict = parse(data)
 
-# var_init = filter(lambda x: x[:-1]=='var ' and len(x.split())==2,data)
-# lim=len(data)
-# var_dict={var_init[i][4]:bin(lim+i)[2:].rjust(8,'0') for i in range(len(var_init))}
-
-# label_trav = [(data[i],i) for i in range(len(data)) if data[i][-1]==':' and len(data[i].split())==1]
-# label_init= [elem[0] for elem in label_trav]
-# label_dict={label_init[i][0][:-1]:bin(label_init[i][1])[2:].rjust(8,'0') for i in range(len(label_trav))}
-
-# op_init = filter(lambda x: x.split()[0] in opcode,data)
-
-# err_init =filter(lambda x: (x not in var_init) and (x not in label_init) and (x not in label_init),data)
-# assert len(err_init) == 0
-def main():
-    var_dict,label_dict,op_dict= parse(data)
-    
     for num in op_dict:
-        line=op_dict[num]
+        line = op_dict[num]
         oper = line[0]
         op = opcode[oper][0]
         type = opcode[oper][1]
+
         if op == "1001":
             assert len(line) == 3
             assert reg_check(line[1])
@@ -196,15 +185,21 @@ def main():
                 assert C_check(line)
                 L.append(op + type_C(line[1], line[2]))
             elif type == "D":
-                assert D_check(line)
-                L.append(op + type_D(line[1], line[2]))
+                assert D_check(line,var_dict)
+                L.append(op + type_D(line[1], line[2],var_dict))
             elif type == "E":
-                assert E_check(line)
-                L.append(op + type_E(line[1]))
+                assert E_check(line,label_dict)
+                L.append(op + type_E(line[1],label_dict))
             else:
-                #assert F_check(op)
+                # assert F_check(op)
                 L.append(op + halt())
 
-with open('binary.txt', 'w') as f:
-    for i in L:
-        f.write(i + '\n')
+    return L
+
+def main():
+    L = process()
+    with open('binary.txt', 'w') as f:
+        for i in L:
+            f.write(i + '\n')
+
+main()
