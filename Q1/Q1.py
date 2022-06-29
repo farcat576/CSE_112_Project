@@ -58,7 +58,6 @@ elif len(commands) > 256:
 # Register mapping
 reg = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110', 'FLAGS': '111'}
 
-
 # Conversion functions for each type
 def type_A(reg1, reg2, reg3):
     return '00' + reg[reg1] + reg[reg2] + reg[reg3]
@@ -113,7 +112,7 @@ def A_check(line, error_ln):
     if len(line) != 4:
         error(error_dict, "204",error_ln)
     #(line[1] in reg) and (line[2] in reg) and (line[3] in reg)
-    elif not((reg_check(line[1])) and (reg_check(line[2])) and (reg_check(line[3]))):
+    elif not ((reg_check(line[1])) and (reg_check(line[2])) and (reg_check(line[3]))):
         error(error_dict, "204", error_ln)
     else:
         return True
@@ -123,34 +122,43 @@ def A_check(line, error_ln):
 def B_check(line,error_ln):
     if len(line) != 3:
         error(error_dict, "204", error_ln)
-    elif not(reg_check(line[1])):
-        error(error_dict, "204", error_ln)
+    elif not (reg_check(line[1])):
+        error(error_dict, "201", error_ln)
     elif not (imm_check(line[2])):
         error(error_dict, "202",str(int(error_ln)))
     return True
     #return reg_check(line[1]) and imm_check(len[2])
 
 
-def C_check(line):
+def C_check(line,error_ln):
     if len(line) != 3:
-        return 0
-    return reg_check(line[1]) and reg_check(line[2])
+        error(error_dict, "204", error_ln)
+    if not (reg_check(line[1]) and reg_check(line[2])):
+        error(error_dict, "201", error_ln)
+    return True
 
 
-def D_check(line,var_dict):
+def D_check(line,var_dict,error_ln):
     if len(line) != 3:
-        return 0
-    return reg_check(line[1]) and var_check(line[2],var_dict)
+        error(error_dict, "204", error_ln)
+    if not (reg_check(line[1])):
+        error(error_dict, "201", error_ln)
+    if not (var_check(line[2],var_dict)):
+        error(error_dict, "301", error_ln)
+    return True
 
 
-def E_check(line,label_dict):
+def E_check(line,label_dict,error_ln):
     if len(line) != 2:
-        return 0
-    return label_check(line[1],label_dict)
+        error(error_dict, "204", error_ln)
+    if not (label_check(line[1],label_dict)) :
+        error(error_dict, "303", error_ln)
+    return True
 
-
-def F_check(line):
-    return line == ["hlt"]
+def F_check(line,error_ln):
+    if line != ["hlt"]:
+        error(error_dict, "204", error_ln)
+    return True
 
 
 # Filtering out statements
@@ -199,35 +207,39 @@ def process():
         op = opcode[oper][0]
         type = opcode[oper][1]
         if op == "1001":
-            # assert len(line) == 3
-            # assert reg_check(line[1])
+            if len(line) != 3:
+                error(error_dict, "204", str(int(num) + 1))
+            elif not reg_check(line[1]):
+                error(error_dict, "201", str(int(num) + 1))
+            
             if imm_check(line[2]):
                 op += "0"
                 type = "B"
-                assert B_check(line, str(int(num) + 1))
                 L.append(op + type_B(line[1], line[2][1:]))
-            if reg_check(line[2]) or flags_check(line[2]):
+            elif reg_check(line[2]) or flags_check(line[2]):
                 op += "1"
                 type = "C"
                 L.append(op + type_C(line[1], line[2]))
+            else:
+                error(error_dict, "204", str(int(num) + 1))
         else:
             if type == "A":
-                assert A_check(line,str(int(num) + 1))
+                A_check(line,str(int(num) + 1))
                 L.append(op + type_A(line[1], line[2], line[3]))
             elif type == "B":
-                assert B_check(line,str(int(num) + 1))
+                B_check(line,str(int(num) + 1))
                 L.append(op + type_B(line[1], line[2][1:]))
             elif type == "C":
-                assert C_check(line)
+                C_check(line,str(int(num) + 1))
                 L.append(op + type_C(line[1], line[2]))
             elif type == "D":
-                assert D_check(line,var_dict)
+                D_check(line,var_dict,str(int(num) + 1))
                 L.append(op + type_D(line[1], line[2],var_dict))
             elif type == "E":
-                assert E_check(line,label_dict)
+                E_check(line,label_dict,str(int(num) + 1))
                 L.append(op + type_E(line[1],label_dict))
             else:
-                # assert F_check(op)
+                F_check(op,str(int(num) + 1))
                 L.append(op + halt())
 
     return L
