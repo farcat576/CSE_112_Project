@@ -20,13 +20,9 @@ def error(error_dict, error_code, error_line = '-1'):
     output.close()
     sys.exit()
 
-
-# if commands.index("hlt") != len(commands) - 1:
-#     error(error_dict, )
-
+# 203,304,305,306,307
 
 # assertion statements for each instruction
-# mov + last bit later
 L = []
 
 # Opcode mapping
@@ -177,7 +173,8 @@ def parse(data):
         if line == []:
             pass
         elif (len(line) == 2 and line[0] == "var"):
-            assert var_start == True
+            if not var_start:
+                error(error_dict, "302", str(i + 1))
             var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
             lim += 1
         elif (line[0][-1] == ":"):
@@ -195,7 +192,9 @@ def parse(data):
             err_dict[str(i)] = " ".join(line)
             var_start = False
 
-    assert len(err_dict) == 0
+    if len(err_dict):
+        error_ln=list(err_dict.keys())[0]
+        error(error_dict, "204", error_ln)
     return var_dict, label_dict, op_dict
 
 def process():
@@ -239,7 +238,7 @@ def process():
                 E_check(line,label_dict,str(int(num) + 1))
                 L.append(op + type_E(line[1],label_dict))
             else:
-                F_check(op,str(int(num) + 1))
+                F_check(line,str(int(num) + 1))
                 L.append(op + halt())
 
     return L
