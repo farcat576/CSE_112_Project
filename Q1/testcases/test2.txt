@@ -1,13 +1,11 @@
 var X
 var Y
-
-
-
 add R0 R1 R2
-mov R6 #100
 mov R5 R6
 ld R5 X
 jmp exit
 add R0 R1 R2
-exit:
+exit: add R0 R1 R2
+mov R6 $1
+bruh: add R0 R1 R2
 hlt
