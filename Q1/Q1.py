@@ -255,3 +255,11 @@ def main(output):
     output.write(L[len(L)-1])
 
 main(output)
+
+#Comments done till label_check
+
+# Errors:
+# 1. incase the hlt instruction is contained at the end in a label, the program should run but it does not
+# 2. incase there is say 1 empty line and 257 lines of code, the assembler should still assemble as it is said that it can write <= 256 lines and the new lines are to be ignored
+# 3. Variables point to the wrong addresses, they should be reduced by the length of the var_dict
+# refer testcase2.txt for checking the above error 3 and testcase1.txt for checking error 2, in folder testcases
