@@ -6,11 +6,6 @@ with open("q1testcase.txt", 'r') as f:
 
 output = open('binary.txt',"w")
 
-# assertion statements for hlt and length of input file
-# assert commands.index("hlt") == len(commands) - 1, "Last command is not hlt"
-# assert len(commands) <= 256, "Too many instructions!"
-
-
 def error(error_dict, error_code, error_line = '-1'):
     if error_line == '-1':
         output.write(error_dict[error_code] + "\nAssembling halted." )
@@ -43,6 +38,7 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
 # Filtering out statements
 def parse(data):
     data = [line.split() for line in data]
+    data = list(filter(lambda a: a != [], data))
 
     var_start = True
     var_dict = dict()
@@ -53,9 +49,7 @@ def parse(data):
 
     for i in range(lim):
         line = data[i]
-        if line == []:
-            pass
-        elif (line[0] == "var"):
+        if (line[0] == "var"):
             if (len(line)!=2):
                 error(error_dict, "304", str(i + 1))
             if not var_start:
