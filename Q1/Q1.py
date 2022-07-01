@@ -20,8 +20,6 @@ def error(error_dict, error_code, error_line = '-1'):
     output.close()
     sys.exit()
 
-# 203,304,305,306,307
-
 # assertion statements for each instruction
 L = []
 
@@ -41,8 +39,53 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
               "306": "Variable used as label.", "307": "Label used as variable."
               }
 
-# if commands.count("hlt") > 1:
-#     error(error_dict, '101')
+
+# Filtering out statements
+def parse(data):
+    data = [line.split() for line in data]
+
+    var_start = True
+    var_dict = dict()
+    label_dict = dict()
+    op_dict = dict()
+    err_dict = dict()
+    lim = len(data)
+
+    for i in range(lim):
+        line = data[i]
+        if line == []:
+            pass
+        elif (line[0] == "var"):
+            if (len(line)!=2):
+                error(error_dict, "304", str(i + 1))
+            if not var_start:
+                error(error_dict, "302", str(i + 1))
+            var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
+            lim += 1
+        elif (": " in " ".join(line)):
+            if (line[0][-1] != ":"):
+                error(error_dict, "305", str(i + 1))
+            label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
+            line = line[1:]
+            if (line[0] in opcode):
+                op_dict[str(i)] = line
+            else:
+                err_dict[str(i)] = " ".join(line)
+            var_start = False
+        elif (line[0] in opcode):
+            op_dict[str(i)] = line
+            var_start = False
+        else:
+            err_dict[str(i)] = " ".join(line)
+            var_start = False
+
+    if len(err_dict):
+        error_ln=list(err_dict.keys())[0]
+        error(error_dict, "204", error_ln)
+    return var_dict, label_dict, op_dict
+
+var_dict, label_dict, op_dict = parse(data)
+
 lin=commands.count("hlt")
 if lin == 0:
     error(error_dict,'102')
@@ -67,11 +110,11 @@ def type_C(reg1, reg2):
     return '00000' + reg[reg1] + reg[reg2]
 
 
-def type_D(reg1, memory,var_dict):
+def type_D(reg1, memory):
     return reg[reg1] + var_dict[memory]
 
 
-def type_E(memory,label_dict):
+def type_E(memory):
     return '000' + label_dict[memory]
 
 
@@ -81,7 +124,7 @@ def halt():
 
 # Helper functions for checking instruction parts
 def reg_check(register):
-    return register in reg
+    return register in reg and register != "FLAGS"
 
 
 def imm_check(imm):
@@ -95,11 +138,11 @@ def flags_check(register):
     return register == "FLAGS"
 
 
-def var_check(var,var_dict):
+def var_check(var):
     return var in var_dict
 
 
-def label_check(lab,label_dict):
+def label_check(lab):
     return lab in label_dict
 
 
@@ -107,8 +150,9 @@ def label_check(lab,label_dict):
 def A_check(line, error_ln):
     if len(line) != 4:
         error(error_dict, "204",error_ln)
-    #(line[1] in reg) and (line[2] in reg) and (line[3] in reg)
     elif not ((reg_check(line[1])) and (reg_check(line[2])) and (reg_check(line[3]))):
+        if (flags_check(line[1]) or flags_check(line[2]) or flags_check(line[3])):
+            error(error_dict, "203", error_ln)
         error(error_dict, "204", error_ln)
     else:
         return True
@@ -119,6 +163,8 @@ def B_check(line,error_ln):
     if len(line) != 3:
         error(error_dict, "204", error_ln)
     elif not (reg_check(line[1])):
+        if (flags_check(line[1])):
+            error(error_dict, "203", error_ln)
         error(error_dict, "201", error_ln)
     elif not (imm_check(line[2])):
         error(error_dict, "202",str(int(error_ln)))
@@ -134,20 +180,26 @@ def C_check(line,error_ln):
     return True
 
 
-def D_check(line,var_dict,error_ln):
+def D_check(line,error_ln):
     if len(line) != 3:
         error(error_dict, "204", error_ln)
     if not (reg_check(line[1])):
+        if (flags_check(line[1])):
+            error(error_dict, "203", error_ln)
         error(error_dict, "201", error_ln)
-    if not (var_check(line[2],var_dict)):
+    if not (var_check(line[2])):
+        if label_check(line[2]):
+            error(error_dict, "307", error_ln)
         error(error_dict, "301", error_ln)
     return True
 
 
-def E_check(line,label_dict,error_ln):
+def E_check(line,error_ln):
     if len(line) != 2:
         error(error_dict, "204", error_ln)
-    if not (label_check(line[1],label_dict)) :
+    if not (label_check(line[1])) :
+        if var_check(line[2]):
+            error(error_dict, "306", error_ln)
         error(error_dict, "303", error_ln)
     return True
 
@@ -156,50 +208,7 @@ def F_check(line,error_ln):
         error(error_dict, "204", error_ln)
     return True
 
-
-# Filtering out statements
-def parse(data):
-    data = [line.split() for line in data]
-
-    var_start = True
-    var_dict = dict()
-    label_dict = dict()
-    op_dict = dict()
-    err_dict = dict()
-    lim = len(data)
-
-    for i in range(lim):
-        line = data[i]
-        if line == []:
-            pass
-        elif (len(line) == 2 and line[0] == "var"):
-            if not var_start:
-                error(error_dict, "302", str(i + 1))
-            var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
-            lim += 1
-        elif (line[0][-1] == ":"):
-            label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
-            line = line[1:]
-            if (line[0] in opcode):
-                op_dict[str(i)] = line
-            else:
-                err_dict[str(i)] = " ".join(line)
-            var_start = False
-        elif (line[0] in opcode):
-            op_dict[str(i)] = line
-            var_start = False
-        else:
-            err_dict[str(i)] = " ".join(line)
-            var_start = False
-
-    if len(err_dict):
-        error_ln=list(err_dict.keys())[0]
-        error(error_dict, "204", error_ln)
-    return var_dict, label_dict, op_dict
-
 def process():
-    var_dict, label_dict, op_dict = parse(data)
-
     for num in op_dict:
         line = op_dict[num]
         oper = line[0]
@@ -232,11 +241,11 @@ def process():
                 C_check(line,str(int(num) + 1))
                 L.append(op + type_C(line[1], line[2]))
             elif type == "D":
-                D_check(line,var_dict,str(int(num) + 1))
-                L.append(op + type_D(line[1], line[2],var_dict))
+                D_check(line,str(int(num) + 1))
+                L.append(op + type_D(line[1], line[2]))
             elif type == "E":
-                E_check(line,label_dict,str(int(num) + 1))
-                L.append(op + type_E(line[1],label_dict))
+                E_check(line,str(int(num) + 1))
+                L.append(op + type_E(line[1]))
             else:
                 F_check(line,str(int(num) + 1))
                 L.append(op + halt())
