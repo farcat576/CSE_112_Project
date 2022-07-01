@@ -1,19 +1,21 @@
 import sys
 
-with open("q1testcase.txt", 'r') as f:
+#Creating a list of strings of the given input and storing it in a variable commands
+with open("test1.txt", 'r') as f:
     data = f.readlines()
-    commands = [data[i].strip() for i in range(len(data))]
+    commands = [data[i].strip() for i in range(len(data))] 
 
 output = open('binary.txt',"w")
 
 def error(error_dict, error_code, error_line = '-1'):
+    """Universal program for checking errors"""
     if error_line == '-1':
         output.write(error_dict[error_code] + "\nAssembling halted." )
         output.close()
-        sys.exit()
+        sys.exit()  #Ending the program incase an error is detected
     output.write("At line " + error_line + ', ' + error_dict[error_code] + "\nAssembling halted.")
-    output.close()
-    sys.exit()
+    output.close() 
+    sys.exit() #Ending the program incase an error is detected
 
 # assertion statements for each instruction
 L = []
@@ -25,6 +27,7 @@ opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld
           "not": ["11101", "C"], "cmp": ["11110", "C"], "jmp": ["11111", "E"], "jlt": ["01100", "E"],
           "jgt": ["01101", "E"], "je": ["01111", "E"], "hlt": ["01010", "F"]}
 
+#creating error_dict which contains code-error mapping and is called in error() function
 error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instruction is not hlt.",
               "103": "Too many instructions given.", "201": "Register not found",
               "202": "Immediate value format not recognised", "203": "Illegal use of FLAGS register detected.",
@@ -40,23 +43,26 @@ def parse(data):
     data = [line.split() for line in data]
     data = list(filter(lambda a: a != [], data))
 
-    var_start = True
+    var_start = True #Declaring var_start for handling the position of variable declaration in input
     var_dict = dict()
     label_dict = dict()
     op_dict = dict()
     err_dict = dict()
     lim = len(data)
 
+    #parsing through the data in order to define variables, mark labels and normal statements
     for i in range(lim):
         line = data[i]
-        if (line[0] == "var"):
+        #checks if variable is in the start and if variable is legally identified
+        if (line[0] == "var"): 
             if (len(line)!=2):
                 error(error_dict, "304", str(i + 1))
             if not var_start:
                 error(error_dict, "302", str(i + 1))
             var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
             lim += 1
-        elif (": " in " ".join(line)):
+        #checks for a colon in the line, if present then check conditions for a label and store line in label_dict
+        elif (": " in " ".join(line)): 
             if (line[0][-1] != ":"):
                 error(error_dict, "305", str(i + 1))
             label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
@@ -66,14 +72,17 @@ def parse(data):
             else:
                 err_dict[str(i)] = " ".join(line)
             var_start = False
+        #checking if the line is in opcode and appending to op_dict for assembling
         elif (line[0] in opcode):
             op_dict[str(i)] = line
             var_start = False
+
         else:
             err_dict[str(i)] = " ".join(line)
             var_start = False
 
-    if len(err_dict):
+    #checked for all syntactical errors, if err_dict is not of 0 length then give syntax error
+    if len(err_dict): 
         error_ln=list(err_dict.keys())[0]
         error(error_dict, "204", error_ln)
     return var_dict, label_dict, op_dict
@@ -120,14 +129,14 @@ def halt():
 def reg_check(register):
     return register in reg and register != "FLAGS"
 
-
+#checking if format of given immediate value is valid and is in the range 0-255(both inclusive)
 def imm_check(imm):
     if imm[0] == '$' and imm[1:].isdigit():
         return int(imm[1:]) >= 0 and int(imm[1:]) < 256
     else:
         return False
 
-
+# Boolean functions that check whether the given parameter holds true or not
 def flags_check(register):
     return register == "FLAGS"
 
