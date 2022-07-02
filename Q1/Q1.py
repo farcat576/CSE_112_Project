@@ -1,23 +1,12 @@
 import sys
 
 #Creating a list of strings of the given input and storing it in a variable commands
-with open("test1.txt", 'r') as f:
+with open("q1testcase.txt", 'r') as f:
     data = f.readlines()
     commands = [data[i].strip() for i in range(len(data))] 
+    commands = list(filter(lambda a: a != "", commands))
 
 output = open('binary.txt',"w")
-
-def error(error_dict, error_code, error_line = '-1'):
-    """Universal program for checking errors"""
-    if error_line == '-1':
-        output.write(error_dict[error_code] + "\nAssembling halted." )
-        output.close()
-        sys.exit()  #Ending the program incase an error is detected
-    output.write("At line " + error_line + ', ' + error_dict[error_code] + "\nAssembling halted.")
-    output.close() 
-    sys.exit() #Ending the program incase an error is detected
-
-# assertion statements for each instruction
 L = []
 
 # Opcode mapping
@@ -34,21 +23,32 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
               "204": "Syntax Error.", "301": "Variable not defined",
               "302": "Variable not defined at the beginning", "303": "Label not found.",
               "304": "Syntax error in use of variable.", "305": "Syntax error in use of label.",
-              "306": "Variable used as label.", "307": "Label used as variable."
+              "306": "Variable used as label.", "307": "Label used as variable.",
+              "308": "Variable already initialised before.", "309": "Label already initialised before."
               }
 
+def error(error_code, error_line = '-1'):
+    """Universal program for checking errors"""
+    if error_line == '-1':
+        output.write(error_dict[error_code] + "\nAssembling halted." )
+        output.close()
+        sys.exit()  #Ending the program incase an error is detected
+    output.write("At line " + error_line + ', ' + error_dict[error_code] + "\nAssembling halted.")
+    output.close() 
+    sys.exit() #Ending the program incase an error is detected
 
 # Filtering out statements
 def parse(data):
     data = [line.split() for line in data]
-    data = list(filter(lambda a: a != [], data))
 
     var_start = True #Declaring var_start for handling the position of variable declaration in input
     var_dict = dict()
     label_dict = dict()
     op_dict = dict()
-    err_dict = dict()
     lim = len(data)
+
+    if lim > 256:
+        error("103")
 
     #parsing through the data in order to define variables, mark labels and normal statements
     for i in range(lim):
@@ -56,46 +56,51 @@ def parse(data):
         #checks if variable is in the start and if variable is legally identified
         if (line[0] == "var"): 
             if (len(line)!=2):
-                error(error_dict, "304", str(i + 1))
+                error("304", str(i + 1))
             if not var_start:
-                error(error_dict, "302", str(i + 1))
-            var_dict[line[1]] = bin(lim)[2:].rjust(8, '0')
+                error("302", str(i + 1))
+            if line[1] in var_dict:
+                error("308", str(i + 1))
+            var_dict[line[1]] = lim
             lim += 1
         #checks for a colon in the line, if present then check conditions for a label and store line in label_dict
         elif (": " in " ".join(line)): 
             if (line[0][-1] != ":"):
-                error(error_dict, "305", str(i + 1))
-            label_dict[line[0][:-1]] = bin(i)[2:].rjust(8, '0')
+                error("305", str(i + 1))
+            if line[0][:-1] in label_dict:
+                error("309", str(i + 1))
+            label_dict[line[0][:-1]] = i
             line = line[1:]
             if (line[0] in opcode):
                 op_dict[str(i)] = line
             else:
-                err_dict[str(i)] = " ".join(line)
+                error("204", str(i + 1))
             var_start = False
         #checking if the line is in opcode and appending to op_dict for assembling
         elif (line[0] in opcode):
             op_dict[str(i)] = line
             var_start = False
-
         else:
-            err_dict[str(i)] = " ".join(line)
-            var_start = False
+            error("204", str(i + 1))
+    
+    lin=list(op_dict.values()).count(["hlt"])
+    if lin == 0:
+        error('102')
+    elif lin > 1:
+        error("101", str(data.index(['hlt']) + 1))
+    
+    #variable declaration do not take up code space in the memory
+    offset = len(var_dict)
+    var_dict = {key : bin(var_dict[key]-offset)[2:].rjust(8, '0')
+                for key in var_dict}
+    label_dict = {key : bin(label_dict[key]-offset)[2:].rjust(8, '0') 
+                for key in label_dict}
+    op_dict = {str(int(key) - offset) : op_dict[key]
+                for key in op_dict}
 
-    #checked for all syntactical errors, if err_dict is not of 0 length then give syntax error
-    if len(err_dict): 
-        error_ln=list(err_dict.keys())[0]
-        error(error_dict, "204", error_ln)
     return var_dict, label_dict, op_dict
 
-var_dict, label_dict, op_dict = parse(data)
-
-lin=commands.count("hlt")
-if lin == 0:
-    error(error_dict,'102')
-elif lin > 1:
-    error(error_dict,"101",str(commands.index('hlt') + 1))
-elif len(commands) > 256:
-    error(error_dict, "103")
+var_dict, label_dict, op_dict = parse(commands)
 
 # Register mapping
 reg = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110', 'FLAGS': '111'}
@@ -152,11 +157,11 @@ def label_check(lab):
 # Functions to check the validity of instructions according to type
 def A_check(line, error_ln):
     if len(line) != 4:
-        error(error_dict, "204",error_ln)
+        error("204",error_ln)
     elif not ((reg_check(line[1])) and (reg_check(line[2])) and (reg_check(line[3]))):
         if (flags_check(line[1]) or flags_check(line[2]) or flags_check(line[3])):
-            error(error_dict, "203", error_ln)
-        error(error_dict, "204", error_ln)
+            error("203", error_ln)
+        error("204", error_ln)
     else:
         return True
 
@@ -164,51 +169,50 @@ def A_check(line, error_ln):
 #immediate value is not checked, pls fix
 def B_check(line,error_ln):
     if len(line) != 3:
-        error(error_dict, "204", error_ln)
+        error("204", error_ln)
     elif not (reg_check(line[1])):
         if (flags_check(line[1])):
-            error(error_dict, "203", error_ln)
-        error(error_dict, "201", error_ln)
+            error("203", error_ln)
+        error("201", error_ln)
     elif not (imm_check(line[2])):
-        error(error_dict, "202",str(int(error_ln)))
+        error("202",str(int(error_ln)))
     return True
-    #return reg_check(line[1]) and imm_check(len[2])
 
 
 def C_check(line,error_ln):
     if len(line) != 3:
-        error(error_dict, "204", error_ln)
+        error("204", error_ln)
     if not (reg_check(line[1]) and reg_check(line[2])):
-        error(error_dict, "201", error_ln)
+        error("201", error_ln)
     return True
 
 
 def D_check(line,error_ln):
     if len(line) != 3:
-        error(error_dict, "204", error_ln)
+        error("204", error_ln)
     if not (reg_check(line[1])):
         if (flags_check(line[1])):
-            error(error_dict, "203", error_ln)
-        error(error_dict, "201", error_ln)
+            error("203", error_ln)
+        error("201", error_ln)
     if not (var_check(line[2])):
         if label_check(line[2]):
-            error(error_dict, "307", error_ln)
-        error(error_dict, "301", error_ln)
+            error("307", error_ln)
+        error("301", error_ln)
     return True
 
 
 def E_check(line,error_ln):
     if len(line) != 2:
-        error(error_dict, "204", error_ln)
+        error("204", error_ln)
     if not (label_check(line[1])) :
         if var_check(line[2]):
-            error(error_dict, "306", error_ln)
-        error(error_dict, "303", error_ln)
+            error("306", error_ln)
+        error("303", error_ln)
     return True
 
 def F_check(line,error_ln):
     if line != ["hlt"]:
-        error(error_dict, "204", error_ln)
+        error("204", error_ln)
     return True
 
 def process():
@@ -219,9 +223,9 @@ def process():
         type = opcode[oper][1]
         if op == "1001":
             if len(line) != 3:
-                error(error_dict, "204", str(int(num) + 1))
+                error("204", str(int(num) + 1))
             elif not reg_check(line[1]):
-                error(error_dict, "201", str(int(num) + 1))
+                error("201", str(int(num) + 1))
             
             if imm_check(line[2]):
                 op += "0"
@@ -232,7 +236,7 @@ def process():
                 type = "C"
                 L.append(op + type_C(line[1], line[2]))
             else:
-                error(error_dict, "204", str(int(num) + 1))
+                error("204", str(int(num) + 1))
         else:
             if type == "A":
                 A_check(line,str(int(num) + 1))
@@ -266,9 +270,3 @@ def main(output):
 main(output)
 
 #Comments done till label_check
-
-# Errors:
-# 1. incase the hlt instruction is contained at the end in a label, the program should run but it does not
-# 2. incase there is say 1 empty line and 257 lines of code, the assembler should still assemble as it is said that it can write <= 256 lines and the new lines are to be ignored
-# 3. Variables point to the wrong addresses, they should be reduced by the length of the var_dict
-# refer testcase2.txt for checking the above error 3 and testcase1.txt for checking error 2, in folder testcases
