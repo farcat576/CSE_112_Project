@@ -11,11 +11,11 @@ output = open('binary.txt',"w")
 L = []
 
 # Opcode mapping of the format {"instruction":["opcode",type]}
-opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld": ["10100", "D"],
-          "st": ["10101", "D"], "mul": ["10110", "A"], "div": ["10111", "C"], "rs": ["11000", "B"],
-          "ls": ["11001", "B"], "xor": ["11010", "A"], "or": ["11011", "A"], "and": ["11100", "A"],
-          "not": ["11101", "C"], "cmp": ["11110", "C"], "jmp": ["11111", "E"],
-          "jlt": ["01100", "E"], "jgt": ["01101", "E"], "je": ["01111", "E"], "hlt": ["01010", "F"]}
+opcode = {"add": ("10000", 'A'), "sub": ("10001", "A"), "mov": ("1001", ""), "ld": ("10100", "D"),
+          "st": ("10101", "D"), "mul": ("10110", "A"), "div": ("10111", "C"), "rs": ("11000", "B"),
+          "ls": ("11001", "B"), "xor": ("11010", "A"), "or": ("11011", "A"), "and": ("11100", "A"),
+          "not": ("11101", "C"), "cmp": ("11110", "C"), "jmp": ("11111", "E"),
+          "jlt": ("01100", "E"), "jgt": ("01101", "E"), "je": ("01111", "E"), "hlt": ("01010", "F")}
 #Note type of instruction for mov is left blank as it can act as a type B and type C instruction
 
 #creating error_dict which contains code-error mapping and is called in error() function
