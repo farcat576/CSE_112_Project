@@ -2,7 +2,7 @@ import sys
 from typing import TextIO
 
 #Creating a list of strings of the given input and storing it in a variable commands
-with open("q1testcase.txt", 'r') as f:
+with open("test2.txt", 'r') as f:
     text = f.readlines()
     commands = [text[i].strip() for i in range(len(text))]
     commands = list(filter(lambda a: a != "", commands))
@@ -10,12 +10,13 @@ with open("q1testcase.txt", 'r') as f:
 output = open('binary.txt',"w")
 L = []
 
-# Opcode mapping
+# Opcode mapping of the format {"instruction":["opcode",type]}
 opcode = {"add": ["10000", 'A'], "sub": ["10001", "A"], "mov": ["1001", ""], "ld": ["10100", "D"],
           "st": ["10101", "D"], "mul": ["10110", "A"], "div": ["10111", "C"], "rs": ["11000", "B"],
           "ls": ["11001", "B"], "xor": ["11010", "A"], "or": ["11011", "A"], "and": ["11100", "A"],
           "not": ["11101", "C"], "cmp": ["11110", "C"], "jmp": ["11111", "E"],
           "jlt": ["01100", "E"], "jgt": ["01101", "E"], "je": ["01111", "E"], "hlt": ["01010", "F"]}
+#Note type of instruction for mov is left blank as it can act as a type B and type C instruction
 
 #creating error_dict which contains code-error mapping and is called in error() function
 error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instruction is not hlt.",
@@ -42,6 +43,8 @@ def error(error_code: str, error_line: str = '-1') -> None:
 
 # Filtering out statements
 def parse(data: list[str]) -> tuple[ dict[str,str], dict[str,str], dict[str,list[str]]]:
+    """This function parses through the list given as parameter and returns variable dictionaries, 
+    label dictionaries, and opcode dictionaries."""
     data = [line.split() for line in data]
 
     var_start = True #Declaring var_start for handling the position of variable declaration in input
@@ -86,6 +89,7 @@ def parse(data: list[str]) -> tuple[ dict[str,str], dict[str,str], dict[str,list
         else:
             error("204", str(i + 1))
 
+    #checking for hlt statements in program
     lin=list(op_dict.values()).count(["hlt"])
     if lin == 0:
         error('102')
@@ -220,12 +224,13 @@ def F_check(line: str, error_ln: str) -> bool:
     return True
 
 def process() -> list[str]:
+    """This function converts the parsed data into final assembled opcode into list L."""
     for num in op_dict:
         line = op_dict[num]
         oper = line[0]
         op = opcode[oper][0]
         type = opcode[oper][1]
-        if op == "1001":
+        if op == "1001": #Defining exclusive case for mov to check whether it is type B or type C
             if len(line) != 3:
                 error("204", str(int(num) + 1))
             elif not reg_check(line[1]):
@@ -264,6 +269,7 @@ def process() -> list[str]:
     return L
 
 def main(output: TextIO) -> None:
+    """This function writes on to the output text file"""
     out = process()
     #with open('binary.txt', 'w') as f:
     for i in range(len(out)-1):
@@ -272,4 +278,3 @@ def main(output: TextIO) -> None:
     output.write(out[len(out)-1])
 
 main(output)
-#Comments done till label_check
