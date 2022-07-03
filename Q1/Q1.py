@@ -1,13 +1,11 @@
-import sys
+from sys import exit, stdin, stdout
 from typing import TextIO
 
 #Creating a list of strings of the given input and storing it in a variable commands
-with open("test2.txt", 'r') as f:
-    text = f.readlines()
-    commands = [text[i].strip() for i in range(len(text))]
-    commands = list(filter(lambda a: a != "", commands))
+text = stdin.readlines()
+commands = [text[i].strip() for i in range(len(text))]
+commands = list(filter(lambda a: a != "", commands))
 
-output = open('binary.txt',"w")
 L = []
 
 # Opcode mapping of the format {"instruction":["opcode",type]}
@@ -34,12 +32,12 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
 def error(error_code: str, error_line: str = '-1') -> None:
     """Universal program for checking errors"""
     if error_line == '-1':
-        output.write(error_dict[error_code] + "\nAssembling halted." )
-        output.close()
-        sys.exit()  #Ending the program incase an error is detected
-    output.write("At line " + error_line + ', ' + error_dict[error_code] + "\nAssembling halted.")
-    output.close()
-    sys.exit() #Ending the program incase an error is detected
+        stdout.write(error_dict[error_code] + "\nAssembling halted." )
+        stdout.close()
+        exit()  #Ending the program incase an error is detected
+    stdout.write("At line " + error_line + ', ' + error_dict[error_code] + "\nAssembling halted.\n")
+    stdout.close()
+    exit() #Ending the program incase an error is detected
 
 # Filtering out statements
 def parse(data: list[str]) -> tuple[ dict[str,str], dict[str,str], dict[str,list[str]]]:
@@ -223,7 +221,7 @@ def F_check(line: str, error_ln: str) -> bool:
         error("204", error_ln)
     return True
 
-def process() -> list[str]:
+def process():
     """This function converts the parsed data into final assembled opcode into list L."""
     for num in op_dict:
         line = op_dict[num]
@@ -266,15 +264,12 @@ def process() -> list[str]:
                 F_check(line,str(int(num) + 1))
                 L.append(op + halt())
 
-    return L
-
-def main(output: TextIO) -> None:
+def main() -> None:
     """This function writes on to the output text file"""
-    out = process()
+    process()
     #with open('binary.txt', 'w') as f:
-    for i in range(len(out)-1):
-        output.write(out[i] + '\n')
+    for i in range(len(L)):
+        stdout.write(L[i] + '\n')
+    stdout.close()
 
-    output.write(out[len(out)-1])
-
-main(output)
+main()
