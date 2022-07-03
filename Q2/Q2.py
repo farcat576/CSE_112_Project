@@ -10,6 +10,8 @@ underflow_lim = 0
 
 #Implemement dec_int helper function
 #Deal with Branch instructions messing with PC
+#Implement invert later on as python gives signed answer
+#Left and right shifts can cause overflow
 
 #Classes for each type
 class A:
@@ -58,6 +60,9 @@ class B:
     def mov_i(self):
         RF[self.reg] = self.imm
     
+    def right(self):
+        RF[self.reg] = RF[self.reg] >> self.imm
+    
     def left(self):
         RF[self.reg] = RF[self.reg] << self.imm
 
@@ -74,7 +79,7 @@ class C:
         RF['000'] = RF[self.reg1] // RF[self.reg2]
         RF['001'] = RF[self.reg1] % RF[self.reg2]
     
-    def invert(self): #Implement later on as python gives signed answer
+    def invert(self):
         RF[self.reg2] = ~RF[self.reg1]
     
     def compare(self):
