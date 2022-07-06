@@ -41,7 +41,8 @@ def line_output():
 # Deal with Branch instructions messing with PC
 # Implement invert later on as python gives signed answer
 # Left and right shifts can cause overflow
-# Hi Sahil, you gotta deal with zero division error, refactor for stdio, test this thing
+# Hi Sahil, you gotta deal with zero division error, refactor for stdio, test this thing...
+# reset FLAGS overflow and underflow bits whenever needed
 
 def dec_int(string):
     string=string[::-1]
