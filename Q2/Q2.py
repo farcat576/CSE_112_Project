@@ -11,7 +11,7 @@ overflow_lim = 2**16 -1
 underflow_lim = 0
 
 
-with open("C:\\Users\\omgsp\\CSE_112_Project\\Q1\\binary.txt","r") as f:
+with open("binary.txt","r") as f:
     data = [line.strip() for line in f.readlines()]
 
 def fix_mem():
@@ -38,10 +38,7 @@ def line_output():
     print()
 
 
-# Deal with Branch instructions messing with PC
-# Implement invert later on as python gives signed answer
-# Left and right shifts can cause overflow
-# Hi Sahil, you gotta deal with zero division error, refactor for stdio, test this thing...
+# refactor for stdio, test this thing...
 # reset FLAGS overflow and underflow bits whenever needed
 
 def dec_int(string):
@@ -100,7 +97,11 @@ class B:
         RF[self.reg] = self.imm
     
     def right(self):
-        RF[self.reg] = RF[self.reg] >> self.imm
+        ans = RF[self.reg] >> self.imm
+        if ans > overflow_lim:
+            ans = ans % (overflow_lim + 1)
+        RF[self.reg] = ans
+        
     
     def left(self):
         RF[self.reg] = RF[self.reg] << self.imm
@@ -116,11 +117,13 @@ class C:
         RF[self.reg2] = RF[self.reg1]
     
     def divide(self):
-        RF['000'] = RF[self.reg1] // RF[self.reg2]
-        RF['001'] = RF[self.reg1] % RF[self.reg2]
+        if RF[self.reg1] // RF[self.reg2]%0 != 0:
+            RF['000'] = RF[self.reg1] // RF[self.reg2]
+            RF['001'] = RF[self.reg1] % RF[self.reg2]
+        
     
     def invert(self):
-        RF[self.reg2] = ~RF[self.reg1]
+        RF[self.reg2] = overflow_lim + 1 + ~RF[self.reg1]
     
     def compare(self):
         ineq = RF[self.reg1] > RF[self.reg2]
@@ -148,10 +151,11 @@ class D:
 class E:
     def __init__(self, line):
         self.oper = opcode[line[:5]][0]
-        self.mem = line[8:16]
+        self.mem = dec_int(line[8:16])
         self.oper(self)
     
     def unconditional(self):
+        global PC
         PC = self.mem - 1
     
     def less(self):
@@ -175,6 +179,7 @@ opcode = {"10000": [A.add, "A"], "10001": [A.subtract, "A"], "10010": [B.mov_i, 
 
 #Initialising lines as instructions of their respective types
 def exec(line):
+    
     code=line[:5]
     type=opcode[code][1]
     if type == "A":
@@ -182,11 +187,12 @@ def exec(line):
     elif type == "B":
         line = B(line)
     elif type == "C":
-        line = B(line)
+        line = C(line)
     elif type == "D":
         line = D(line)
     elif type == "E":
         line = E(line)
+    
     line_output()
     # else:
     #     output_testing()
