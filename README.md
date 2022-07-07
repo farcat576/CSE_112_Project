@@ -16,11 +16,11 @@ The assembler also has helper functions for the syntax verifying functions for r
 
 The inputted assembly code is first parsed through using the `parse()` function.     
 > This function returns mappings for variables `var_dict`, labels `label_dict` and the final opcode dictionary `op_dict`.     
-> This function checks for `hlt` statements, variable space, length of input assembly code, re-initialisations and general syntax.     
+> This function checks for `hlt` statements, variable space, length of input assembly code, re-initialisations and general syntax of labels and variables.     
 
 The `process()` function converts the parsed data into the final assembled binary code into a list `L`.      
 > The `mov` instruction is manually checked as it has two possible types (register type or immediate value type.)     
-> The rest of the instructions are checked for their particular syntax as per their type (A, B, C, D, E, F) and their corresponding binary code is generated to appended to `L`.     
+> The rest of the instructions are checked for their particular syntax as per their type (A, B, C, D, E, F) and their corresponding binary code is generated to appended to `L`. If an error is found, the assembling process is halted and the error is printed on the console.      
 
-The final binary code is then printed from `L` to the console.     
+The final binary code is then printed from the list `L` to the console.     
 This is the output of the assembler.
