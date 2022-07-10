@@ -1,4 +1,4 @@
-from sys import exit
+from sys import exit, stdin, stdout
 
 #Initializing all needed hardware equivalents
 MEM = ['0'*16] * 256
@@ -11,8 +11,9 @@ overflow_lim = 2**16 -1
 underflow_lim = 0
 
 
-with open("binary.txt","r") as f:
-    data = [line.strip() for line in f.readlines()]
+data = stdin.readlines()
+data = [line.strip() for line in data]
+data = list(filter(lambda a: a != "", data))
 
 def fix_mem():
     for i in range(len(data)):
@@ -29,13 +30,13 @@ def make_binary(number, length):
 
 def mem_dump():
     for line in MEM:
-        print(line)
+        stdout.write(line + "\n")
 
 def line_output():
-    print(make_binary(PC,8), end= ' ')
+    stdout.write(f"{make_binary(PC,8)} ")
     for register in RF:
-        print(make_binary(RF[register],16), end= ' ')
-    print()
+        stdout.write(f"{make_binary(RF[register],16)} ")
+    stdout.write("\n")
 
 
 # refactor for stdio, test this thing...
