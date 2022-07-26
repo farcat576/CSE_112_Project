@@ -25,18 +25,24 @@ class Query_1(Computer):
         Computer.__init__(self,text[0],text[1])
         self.instruction=int(text[2])
         self.register=int(text[3])
+
+        print(self.address_bit)
+        print(self.opcode_bit())
+        print(self.filler_bit())
+        print(self.max_op())
+        print(self.max_reg())
     
     def opcode_bit(self):
-        return self.instruction-self.address_bit()-7
+        return self.instruction-self.address_bit()-self.register
     
     def filler_bit(self):
-        return self.address_bit(self)-7
+        return self.address_bit(self)-self.register
     
     def max_op(self):
         return 2**self.opcode_bit()
     
     def max_reg(self):
-        return 2**7
+        return 2**self.register
     
 class Query_2(Computer):
     def __init__(self,text):
@@ -50,6 +56,7 @@ class Query_2(Computer):
             self.addressing = self.CPU
         if self.new_addressing == "CPU":
             self.new_addressing = self.CPU
+        print(self.new_pins())
     
     def new_bit(self):
         return self.memory-self.new_addressing
@@ -64,6 +71,7 @@ class Query_3(Computer):
         type = text[4].strip()[0]
         self.pins=int(text[3].split()[0])
         self.add =address(type)
+        print(self.new_memory())
     
     def new_memory(self):
         total = self.pins+self.add
@@ -75,9 +83,13 @@ class Query_3(Computer):
         
         num = 2**(total-data_out[i][0])
         type = data_out[i][1]
+        return str(num)+" "+type
 
 def main():
     L=[]
+    L=[input() for i in range(4)]
+    if L[3][-4:] == "pins":
+        L.append(input())
     if len(L) == 5:
         Query_3(L)
     else:
