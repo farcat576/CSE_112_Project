@@ -216,8 +216,10 @@ opcode = {"10000": [A.add, "A"], "10001": [A.subtract, "A"], "10010": [B.mov_i, 
 #Initialising lines as instructions of their respective types
 def exec(line):
     
+    RF=['0']*16
     code=line[:5]
     type=opcode[code][1]
+    
     if type == "A":
         line = A(line)
     elif type == "B":
