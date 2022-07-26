@@ -11,7 +11,7 @@ RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 
 
 overflow_lim = 2**16 -1
 underflow_lim = 0
-
+prev_flags = ['0']*16
 
 data = stdin.readlines()
 data = [line.strip() for line in data]
@@ -216,7 +216,7 @@ opcode = {"10000": [A.add, "A"], "10001": [A.subtract, "A"], "10010": [B.mov_i, 
 #Initialising lines as instructions of their respective types
 def exec(line):
     
-    RF=['0']*16
+    prev_flags=RF['111']
     code=line[:5]
     type=opcode[code][1]
     
@@ -231,6 +231,8 @@ def exec(line):
     elif type == "E":
         line = E(line)
     
+    if prev_flags == RF['111']:
+        RF['111']=['0']*16
     line_output()
     # else:
     #     output_testing()
