@@ -48,6 +48,35 @@ def dec_int(string):
                 for i in range(len(string))])
     return result
 
+def bin_to_float(binary):
+    exp = binary[:3]
+    mantissa = binary[3:]
+    return 2**(int(exp,2)) * (int(mantissa,2)/(2**5))
+
+def float_to_bin(float_num):
+    decimal,fraction = str(float_num).split('.')
+    x = int(decimal)
+    for i in range(1,8):
+        if x == 1:
+            exp = i
+            break
+        x//=2
+    exp = bin(exp)[2:].rjust(3,'0')
+    fraction = int(fraction)
+    for i in range(5):
+        fraction*=2
+        if fraction>=1:
+            fraction-=1
+            binf+='1'
+        if (fraction)%1 == 0:
+            break
+    decimal = bin(int(decimal))[2:]
+    binf = (decimal + str(fraction)).rstrip('0')
+    if len(binf)>5:
+        #redirect for error
+        return("wrong")
+    return (exp + binf).ljust(8, "0")
+
 #Classes for each type
 class A:
     def __init__(self, line):
@@ -58,15 +87,15 @@ class A:
         self.oper(self)
     
     def addf(self):
-        ans = (2.0**(RF[self.reg1][:3]) * RF[self.reg1][3:]) + (2.0** (RF[self.reg2][:3]) * RF[self.reg2][3:])
-        if ans > overflow_lim:
+        ans = bin_to_float(RF[self.reg1]) + bin_to_float(RF[self.reg2])
+        if ans > 124.0:
             RF['111'][-4] = '1'
-            ans = ans % (overflow_lim + 1)
-        RF[self.reg3] = ans #Need to change this to be proper 3 bit exponent and 5 bit mantissa
+            ans = ans % (124)
+        RF[self.reg3] = ans
         
     def subtractf(self):
-        ans = (2.0**(RF[self.reg1][:3]) * RF[self.reg1][3:]) - (2.0** (RF[self.reg2][:3]) * RF[self.reg2][3:])
-        if ans < underflow_lim:
+        ans = bin_to_float(RF[self.reg1]) - bin_to_float(RF[self.reg2])
+        if bin_to_float(RF[self.reg1]) < bin_to_float(RF[self.reg2]):
             RF['111'][-4] = '1'
             ans = 0
         RF[self.reg3] = ans #Need to change this to be proper 3 bit exponent and 5 bit mantissa
@@ -112,8 +141,8 @@ class B:
         RF[self.reg] = self.imm
 
     def mov_if(self):
-        RF[self.reg] = self.imm #Need to change this to be proper 3 bit exponent and 5 bit mantissa
-    
+        RF[self.reg] = self.imm
+
     def right(self):
         ans = RF[self.reg] >> self.imm
         if ans > overflow_lim:
