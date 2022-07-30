@@ -231,8 +231,10 @@ def exec(line):
     elif type == "E":
         line = E(line)
     
-    if prev_flags == RF['111']:
-        RF['111']=['0']*16
+    for ind in range(1,5):
+        if prev_flags[-ind] == RF['111'][-ind]:
+            RF['111'][-ind]='0'
+    
     line_output()
     # else:
     #     output_testing()
