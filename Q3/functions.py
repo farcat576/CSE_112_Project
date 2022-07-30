@@ -35,7 +35,7 @@ def float_to_bin(float_num):
 
 def float_check(f: str) -> bool:
     whole, decimal = f[1:].split('.')
-    if f[0] == '$' and whole.isdigit() and decimal.isdigit():
-        return float(f[1:]) >= 0 and float(f[1:]) <= 124.0
+    if f[0] == '$':
+        return True
     else:
-        return False
+        return error()
