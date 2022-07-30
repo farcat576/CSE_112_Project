@@ -28,7 +28,8 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
               "304": "Syntax error in use of variable.", "305": "Syntax error in use of label.",
               "306": "Variable used as label.", "307": "Label used as variable.",
               "308": "Variable already initialised before.",
-              "309": "Label already initialised before.", "205": "Float value format not recognised"
+              "309": "Label already initialised before.", "401": "Float value format not recognised",
+              "402": "Given value is not in float format"
               }
 
 def error(error_code: str, error_line: str = '-1') -> None:
