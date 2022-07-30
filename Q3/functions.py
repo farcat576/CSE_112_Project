@@ -38,4 +38,4 @@ def float_check(f: str) -> bool:
     if f[0] == '$':
         return True
     else:
-        return error()
+        return False
