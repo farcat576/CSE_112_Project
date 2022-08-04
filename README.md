@@ -23,4 +23,21 @@ The `process()` function converts the parsed data into the final assembled binar
 > The rest of the instructions are checked for their particular syntax as per their type (A, B, C, D, E, F) and their corresponding binary code is generated to appended to `L`. If an error is found, the assembling process is halted and the error is printed on the console.      
 
 The final binary code is then printed from the list `L` to the console.     
-This is the output of the assembler.
+This is the output of the assembler.        
+
+## Simulator        
+The simulator has been coded in Python.           
+The program equivalent for the memory is a _list_ `MEM` of 256 strings, all set to `'0000000000000000'` by default. The program counter has been represented by an _integer_ `PC` and the register file is represented as a _dictionary_ `RF` with the register names as the keys, which store the values of the registers, with the exception of the FLAGS register, which stores a string.          
+The simulator reads binary machine code from the standard console. The instructions are then stored in the memory through the function `fix_mem()`, called after the input is taken.            
+Instructions are then executed line by line with the `exec()` function called on the entire memory with a while loop which runs until the machine code equivalent of `hlt` is reached.             
+
+The `exec()` function determines the type of the instruction with the help of `opcode`, an opcode mapping. Once the type of the instruction has been determined, the instruction is interpreted as an object of its type.         
+> We have defined classes for every type of instruction (A, B, C, D, E, F) and during the initialisation of the instruction object, the exact command and its arguments are determined. The requested command is then directly executed by making a call to its respective method within the class.                     
+
+
+After a line is fully executed, the program counter and the values stored in the registers are printed on the standard console with the `line_output()` function. All the values are printed in binary.           
+When the `hlt` statement is reached, the entire state of the program's memory is printed out on the console by calling the `mem_dump()` function.         
+
+
+This is the output of the simulator.                
+
