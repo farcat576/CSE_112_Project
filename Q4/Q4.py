@@ -29,21 +29,23 @@ y_axis = []
 cycle = 1
 
 def plot_graph():
+    #x_axis -> cycle number
+    #y_axis -> memory location accessed
     global x_axis
-    plt.xticks([i for i in range(max(x_axis) + 20)])
     colours = [i for i in range(len(x_axis))]
     x_axis = np.array(x_axis)
     global y_axis
-    plt.yticks([i for i in range(max(y_axis) + 20)])
     y_axis = np.array(y_axis)
     colours = np.array(colours)
 
     area = (5 * 1) ** 2
 
     plt.scatter(x_axis, y_axis, s = area, c = colours, alpha = 0.5)
-    plt.xticks([i for i in range((max(x_axis) + 1)*2)])
-    plt.yticks([i for i in range((max(y_axis) + 1)*2)])
+    plt.xticks([i for i in range((max(x_axis) + 1))])
+    plt.yticks([i for i in range((max(y_axis) + 1))])
     plt.title("Scatter Plot Diagram")
+    plt.xlabel("Cycle Number")
+    plt.ylabel("Memory Location")
     plt.show()
 #____________________________________________________________
 
