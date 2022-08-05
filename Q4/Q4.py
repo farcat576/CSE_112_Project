@@ -1,17 +1,15 @@
 from sys import exit, stdin, stdout
-import numpy as np
-import matplotlib.pyplot as plt
 
 #Initializing all needed hardware equivalents
 MEM = ['0'*16] * 256
 
 PC = 0
 
-RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : ['0']*16}
+RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : 0}
 
 overflow_lim = 2**16 -1
 underflow_lim = 0
-prev_flags = ['0']*16
+
 
 data = stdin.readlines()
 data = [line.strip() for line in data]
@@ -23,38 +21,7 @@ def fix_mem():
 
 fix_mem()
 
-#Variables and function for plotting the scatter graph
-x_axis = []
-y_axis = []
-cycle = 1
-
-def plot_graph():
-    #x_axis -> cycle number
-    #y_axis -> memory location accessed
-    global x_axis
-    colours = [i for i in range(len(x_axis))]
-    x_axis = np.array(x_axis)
-    global y_axis
-    y_axis = np.array(y_axis)
-    colours = np.array(colours)
-
-    area = (5 * 1) ** 2
-
-    plt.scatter(x_axis, y_axis, s = area, c = colours, alpha = 0.5)
-    plt.xticks([i for i in range((max(x_axis) + 1))])
-    plt.yticks([i for i in range((max(y_axis) + 1))])
-    plt.title("Scatter Plot Diagram")
-    plt.xlabel("Cycle Number")
-    plt.ylabel("Memory Location")
-    plt.show()
-#____________________________________________________________
-
 def make_binary(number, length):
-    if number == '0000000000000000':
-        return '0000000000000000'
-    if type(number) == list:
-        number = ''.join(number)
-        return number
     number = bin(number)[2:]
     number = number.rjust(length, "0")
     return number
@@ -91,21 +58,21 @@ class A:
     def add(self):
         ans = RF[self.reg1] + RF[self.reg2]
         if ans > overflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = ans % (overflow_lim + 1)
         RF[self.reg3] = ans
     
     def subtract(self):
         ans = RF[self.reg1] - RF[self.reg2]
         if ans < underflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = 0
         RF[self.reg3] = ans
     
     def multiply(self):
         ans = RF[self.reg1] * RF[self.reg2]
         if ans > overflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = ans % (overflow_lim + 1)
         RF[self.reg3] = ans
     
@@ -161,11 +128,11 @@ class C:
         ineq = RF[self.reg1] > RF[self.reg2]
         eq = RF[self.reg1] == RF[self.reg2]
         if ineq:
-            RF['111'][-2] = '1'
+            RF['111'] += 2
         elif eq:
-            RF['111'][-1] = '1'
+            RF['111'] += 1
         else:
-            RF['111'][-3] = '1'
+            RF['111'] += 4
 
 class D:
     def __init__(self, line):
@@ -175,13 +142,9 @@ class D:
         self.oper(self)
     
     def load(self):
-        x_axis.append(cycle)
-        y_axis.append(self.mem)
         RF[self.reg] = MEM[self.mem]
     
     def store(self):
-        x_axis.append(cycle)
-        y_axis.append(self.mem)
         MEM[self.mem] = make_binary(RF[self.reg],16)
 
 class E:
@@ -191,21 +154,19 @@ class E:
         self.oper(self)
     
     def unconditional(self):
-        x_axis.append(cycle)
-        y_axis.append(self.mem)
         global PC
         PC = self.mem - 1
     
     def less(self):
-        if RF['111'][-3] == '1':
+        if (RF['111'] >> 2) % 2 == 1:
             E.unconditional(self)
     
     def greater(self):
-        if RF['111'][-2] == '1':
+        if (RF['111'] >> 1) % 2 == 1:
             E.unconditional(self)
     
     def equal(self):
-        if RF['111'][-1] == '1':
+        if RF['111'] % 2 == 1:
             E.unconditional(self)
 
 #Opcode mapping        
@@ -218,10 +179,10 @@ opcode = {"10000": [A.add, "A"], "10001": [A.subtract, "A"], "10010": [B.mov_i, 
 #Initialising lines as instructions of their respective types
 def exec(line):
     
-    prev_flags=RF['111']
+    prev_flags=make_binary(RF['111'],16)
+
     code=line[:5]
     type=opcode[code][1]
-    
     if type == "A":
         line = A(line)
     elif type == "B":
@@ -233,17 +194,15 @@ def exec(line):
     elif type == "E":
         line = E(line)
     
-    for ind in range(1,5):
-        if prev_flags[-ind] == RF['111'][-ind]:
-            RF['111'][-ind]='0'
+    curr_flags = make_binary(RF['111'],16)
+    if (curr_flags == prev_flags):
+        RF['111']=0
     
     line_output()
     # else:
     #     output_testing()
     #     PC += 1
     #     exit()
-    global cycle
-    cycle += 1
 
 
 
@@ -252,7 +211,5 @@ while MEM[PC] != "0101000000000000":
     PC += 1
 
 #output()
-#line_output()
-#mem_dump()
-plot_graph()
-
+line_output()
+mem_dump()
