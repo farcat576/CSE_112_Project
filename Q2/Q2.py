@@ -5,13 +5,14 @@ MEM = ['0'*16] * 256
 
 PC = 0
 
-RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : '0000000000000000'}
+RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : 0}
 
 overflow_lim = 2**16 -1
 underflow_lim = 0
 
 
 data = stdin.readlines()
+#data = ["1111000000001010", "0101000000000000"]
 data = [line.strip() for line in data]
 data = list(filter(lambda a: a != "", data))
 
@@ -22,8 +23,6 @@ def fix_mem():
 fix_mem()
 
 def make_binary(number, length):
-    if number == '0000000000000000':
-        return '0000000000000000'
     number = bin(number)[2:]
     number = number.rjust(length, "0")
     return number
@@ -60,21 +59,21 @@ class A:
     def add(self):
         ans = RF[self.reg1] + RF[self.reg2]
         if ans > overflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = ans % (overflow_lim + 1)
         RF[self.reg3] = ans
     
     def subtract(self):
         ans = RF[self.reg1] - RF[self.reg2]
         if ans < underflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = 0
         RF[self.reg3] = ans
     
     def multiply(self):
         ans = RF[self.reg1] * RF[self.reg2]
         if ans > overflow_lim:
-            RF['111'][-4] = '1'
+            RF['111'] += 8
             ans = ans % (overflow_lim + 1)
         RF[self.reg3] = ans
     
@@ -118,9 +117,8 @@ class C:
         RF[self.reg2] = RF[self.reg1]
     
     def divide(self):
-        if RF[self.reg1] // RF[self.reg2]%0 != 0:
-            RF['000'] = RF[self.reg1] // RF[self.reg2]
-            RF['001'] = RF[self.reg1] % RF[self.reg2]
+        RF['000'] = RF[self.reg1] // RF[self.reg2]
+        RF['001'] = RF[self.reg1] % RF[self.reg2]
         
     
     def invert(self):
@@ -130,11 +128,11 @@ class C:
         ineq = RF[self.reg1] > RF[self.reg2]
         eq = RF[self.reg1] == RF[self.reg2]
         if ineq:
-            RF['111'][-2] = '1'
+            RF['111'] += 2
         elif eq:
-            RF['111'][-1] = '1'
+            RF['111'] += 1
         else:
-            RF['111'][-3] = '1'
+            RF['111'] += 4
 
 class D:
     def __init__(self, line):
@@ -160,15 +158,15 @@ class E:
         PC = self.mem - 1
     
     def less(self):
-        if RF['111'][-3] == '1':
+        if (RF['111'] >> 2) % 2 == 1:
             E.unconditional(self)
     
     def greater(self):
-        if RF['111'][-2] == '1':
+        if (RF['111'] >> 1) % 2 == 1:
             E.unconditional(self)
     
     def equal(self):
-        if RF['111'][-1] == '1':
+        if RF['111'] % 2 == 1:
             E.unconditional(self)
 
 #Opcode mapping        
@@ -181,6 +179,8 @@ opcode = {"10000": [A.add, "A"], "10001": [A.subtract, "A"], "10010": [B.mov_i, 
 #Initialising lines as instructions of their respective types
 def exec(line):
     
+    prev_flags=make_binary(RF['111'],16)
+
     code=line[:5]
     type=opcode[code][1]
     if type == "A":
@@ -194,6 +194,10 @@ def exec(line):
     elif type == "E":
         line = E(line)
     
+    curr_flags = make_binary(RF['111'],16)
+    if (curr_flags == prev_flags):
+        RF['111']=0
+
     line_output()
     # else:
     #     output_testing()
@@ -207,5 +211,6 @@ while MEM[PC] != "0101000000000000":
     PC += 1
 
 #output()
+RF['111']=0
 line_output()
 mem_dump()
