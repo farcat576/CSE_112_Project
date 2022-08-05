@@ -6,7 +6,7 @@ Farhan Ali     (farcat576)      CSE 2021045
 Sahil Saraswat (sahilence)      CSE 2021091   
 Anshuman Bunga (AstraTriesGit)  CSE 2021016   
 
-## Assembler
+## Assembler (Q1)                     
 The assembler has been coded in Python.    
 The assemble reads assembly code from the standard console. All the lines of the assembly code are read before it is processed. The final code is then submitted with the `Ctrl + D` key. Empty lines in the assembly code have been ignored.     
 
@@ -25,7 +25,7 @@ The `process()` function converts the parsed data into the final assembled binar
 The final binary code is then printed from the list `L` to the console.     
 This is the output of the assembler.        
 
-## Simulator        
+## Simulator (Q2)           
 The simulator has been coded in Python.           
 The program equivalent for the memory is a _list_ `MEM` of 256 strings, all set to `'0000000000000000'` by default. The program counter has been represented by an _integer_ `PC` and the register file is represented as a _dictionary_ `RF` with the register names as the keys, which store the values of the registers, with the exception of the FLAGS register, which stores a string.          
 The simulator reads binary machine code from the standard console. The instructions are then stored in the memory through the function `fix_mem()`, called after the input is taken.            
@@ -39,5 +39,19 @@ After a line is fully executed, the program counter and the values stored in the
 When the `hlt` statement is reached, the entire state of the program's memory is printed out on the console by calling the `mem_dump()` function.         
 
 
-This is the output of the simulator.                
+This is the output of the simulator.                  
+
+## Floating Point Arithmetic Support (Q3)             
+We have extended the functionality of the assembler and simulator by supporting the addition and subtraction of floating point numbers, as well as the storing of a float value in a register.                
+> In the assembler, we have updated the error dictionary to include possible errors in the syntax for floating point numbers. Helper functions `bin_to_float()`, `float_to_bin()` and `float_check()` have been implemented to ensure the proper implementation of flop arithmetic.                      
+> In the simulator, `addf()`, `subtractf()` have been included in Class A methods, while `movif()` is implemented as a method in Class B.                       
+
+## Memory Access Trace (Q4)                 
+We have created a function `plot_graph()` which plots the memory location accessed to the cycle number in which it was accessed due to the `ld` and `st` instructions. A global variable `cycle` was created for this purpose.              
+The graphs are plotted using the `matplotlib` module.           
+> The X-axis marks the cycle number while the Y-axis marks the memory location accessed at that cycle number.                       
+
+## Memory Mumbo Jumbo (Q5)                    
+
+
 
