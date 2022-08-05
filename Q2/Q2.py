@@ -12,7 +12,6 @@ underflow_lim = 0
 
 
 data = stdin.readlines()
-#data = ["1111000000001010", "0101000000000000"]
 data = [line.strip() for line in data]
 data = list(filter(lambda a: a != "", data))
 
