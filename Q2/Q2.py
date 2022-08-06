@@ -3,7 +3,8 @@ from sys import exit, stdin, stdout
 #Initializing all needed hardware equivalents
 MEM = ['0'*16] * 256
 
-PC = 0
+PC=0
+j_PC=-1
 
 RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : 0}
 
@@ -12,6 +13,9 @@ underflow_lim = 0
 
 
 data = stdin.readlines()
+#data = ["1001000100000101","1001001000000001","1010001100011110","1000000011010011","1010101100011110","1010010000011011","1010010100011100","1010011000011101"
+#,"1010010000011000","1010010100011001","1010011000011010","1000000100010100","1000000101100101","1000000110101110","1010110000011010","1010110100011001","1010111000011000"
+#,"1010110000011101","1010110100011100","1010111000011011","1111000000011001","0110100000010111","1111100000000010","0101000000000000"]
 data = [line.strip() for line in data]
 data = list(filter(lambda a: a != "", data))
 
@@ -141,7 +145,7 @@ class D:
         self.oper(self)
     
     def load(self):
-        RF[self.reg] = MEM[self.mem]
+        RF[self.reg] = dec_int(MEM[self.mem])
     
     def store(self):
         MEM[self.mem] = make_binary(RF[self.reg],16)
@@ -154,7 +158,9 @@ class E:
     
     def unconditional(self):
         global PC
-        PC = self.mem - 1
+        global j_PC
+
+        j_PC = self.mem
     
     def less(self):
         if (RF['111'] >> 2) % 2 == 1:
@@ -207,7 +213,11 @@ def exec(line):
 
 while MEM[PC] != "0101000000000000":
     exec(MEM[PC])
-    PC += 1
+    if (j_PC==-1):
+        PC += 1
+    else:
+        PC=j_PC
+        j_PC=-1
 
 #output()
 RF['111']=0
