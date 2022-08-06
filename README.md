@@ -52,6 +52,17 @@ The graphs are plotted using the `matplotlib` module.
 > The X-axis marks the cycle number while the Y-axis marks the memory location accessed at that cycle number.                       
 
 ## Memory Mumbo Jumbo (Q5)                    
+We have created a separate program to answer queires related to memory in a computer.                
+We take the memory space of the computer and the memory addressing type of the computer as a common input.                
+> For Query 1 (ISA and instruction related), we take the length of the instruction and the length of the registers in bits as input.              
+> For Query 2 (changing the addressable memory), we take the number of bits of the CPU and the new addressable memory as input.             
+> For Query 3 (calculating the size of the main memory), we take the number of bits of the CPU,the number of pins and the type of addressable memory as input.          
+
+We have defined classes to resolve the given query. The `Computer` class defines a computer with the inputted memory space and the addressing type. The `Computer` class is called by the query classes `Query_1`, `Query_2` or `Query_3` depending on the input given to the program.
+
+> Query 1 outputs the number of bits required to represent an address, the number of bits in an opcode, the number of filler bits in instructions, the maximum number of operations supported and the number of registers supported by the ISA.               
+> Query 2 outputs the change in pins required to implement the change in the addressing mode.           
+> Query 3 outputs the maximum size of the main memory of the computer.                          
 
 
 
