@@ -190,7 +190,7 @@ class D:
         self.oper(self)
     
     def load(self):
-        RF[self.reg] = MEM[self.mem]
+        RF[self.reg] =dec_int(MEM[self.mem])
     
     def store(self):
         MEM[self.mem] = make_binary(RF[self.reg],16)
