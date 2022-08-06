@@ -89,14 +89,14 @@ class A:
         ans = bin_to_float(RF[self.reg1]) + bin_to_float(RF[self.reg2])
         if ans > 252.0:
             RF['111'][-4] = '1'
-            ans = 0
+            ans = 252.0
         RF[self.reg3] = ans
         
     def subtractf(self):
         ans = bin_to_float(RF[self.reg1]) - bin_to_float(RF[self.reg2])
-        if ans<0:
+        if ans<1:
             RF['111'][-4] = '1'
-            ans = 0
+            ans = 1
         RF[self.reg3] = ans
 
     def add(self):
