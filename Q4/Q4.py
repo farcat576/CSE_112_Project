@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 MEM = ['0'*16] * 256
 
 PC = 0
+j_PC = -1
 
 RF = {'000' : 0, '001' : 0, '010' : 0, '011' : 0, '100' : 0, '101' : 0, '110' : 0, '111' : ['0']*16}
 
@@ -243,7 +244,9 @@ class E:
         x_axis.append(cycle)
         y_axis.append(self.mem)
         global PC
-        PC = self.mem - 1
+        global j_PC
+        
+        j_PC = self.mem
     
     def less(self):
         if RF['111'][-3] == '1':
@@ -298,7 +301,11 @@ def exec(line):
 
 while MEM[PC] != "0101000000000000":
     exec(MEM[PC])
-    PC += 1
+    if (j_PC==-1):
+        PC += 1
+    else:
+        PC=j_PC
+        j_PC=-1
 
 RF['111']=0
 plot_graph()
