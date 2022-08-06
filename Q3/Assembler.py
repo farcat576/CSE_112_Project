@@ -292,17 +292,19 @@ def process():
         if op == "1001": #Defining exclusive case for mov to check whether it is type B or type C
             if len(line) != 3:
                 error("204", str(int(num) + 1))
-            elif not reg_check(line[1]):
+            elif not reg_check(line[1]) and not flags_check(line[1]):
                 error("201", str(int(num) + 1))
 
             if imm_check(line[2]):
                 op += "0"
                 type = "B"
                 L.append(op + type_B(line[1], line[2][1:]))
-            elif reg_check(line[2]) or flags_check(line[2]):
+            elif reg_check(line[2]):
                 op += "1"
                 type = "C"
                 L.append(op + type_C(line[1], line[2]))
+            elif flags_check(line[2]):
+                error("203", str(int(num) + 1))
             else:
                 error("204", str(int(num) + 1))
         elif op == "00010":
