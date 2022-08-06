@@ -92,7 +92,7 @@ def main():
     L=[]
     L=[input().strip() for i in range(4)]
     if L[3][-4:] == "pins":
-        L.append(input())
+        L.append(input().strip())
     if len(L) == 5:
         Query_3(L)
     else:
