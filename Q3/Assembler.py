@@ -1,6 +1,5 @@
 from sys import exit, stdin, stdout
 from typing import TextIO
-from unicodedata import decimal
 
 #Creating a list of strings of the given input and storing it in a variable commands
 text = stdin.readlines()
@@ -29,9 +28,9 @@ error_dict = {"101": "duplicate hlt statement detected.", "102": "Last instructi
               "306": "Variable used as label.", "307": "Label used as variable.",
               "308": "Variable already initialised before.",
               "309": "Label already initialised before.", "401": "Float value format not recognised",
-              "402": "Given value is not in float format"
+              "402": "The sum/difference can not be represented using given notation"
               }
-
+              
 def error(error_code: str, error_line: str = '-1') -> None:
     """Universal program for checking errors"""
     if error_line == '-1':
@@ -45,31 +44,38 @@ def error(error_code: str, error_line: str = '-1') -> None:
 def bin_to_float(binary):
     exp = binary[:3]
     mantissa = binary[3:]
-    return 2**(int(exp,2)) * (int(mantissa,2)/(2**5))
+    return 2**(int(exp,2)) * (1 + int(mantissa,2)/(2**5))
 
 def float_to_bin(float_num):
     decimal,fraction = str(float_num).split('.')
     x = int(decimal)
-    for i in range(1,8):
+    binf = ''
+    exp = 0
+    for i in range(8):
         if x == 1:
             exp = i
             break
         x//=2
-    exp = bin(exp)[2:].rjust(3,'0')
-    fraction = int(fraction)
-    for i in range(5):
+    if exp>7:
+        return 0
+    fraction = int(fraction)/10**len(fraction)
+    for i in range(6):
         fraction*=2
         if fraction>=1:
             fraction-=1
             binf+='1'
+        else:
+            binf+='0'
         if (fraction)%1 == 0:
             break
+    if fraction%1!=0:
+        return 0
     decimal = bin(int(decimal))[2:]
-    binf = (decimal + str(fraction)).rstrip('0')
+    binf = (decimal + binf)[1:].rstrip('0')
+    print(decimal,binf)
     if len(binf)>5:
-        #redirect for error
-        return("wrong")
-    return (exp + binf).ljust(8, "0")
+        return 0
+    return 1
 
 # Filtering out statements
 def parse(data: list[str]) -> tuple[ dict[str,str], dict[str,str], dict[str,list[str]]]:
@@ -182,9 +188,10 @@ def imm_check(imm: str) -> bool:
 def float_check(f: str) -> bool:
     whole, decimal = f[1:].split('.')
     if f[0] == '$' and whole.isdigit() and decimal.isdigit():
-        return float(f[1:]) >= 0 and float(f[1:]) < 124.0
+        return float(f[1:]) >= 0 and float(f[1:]) <= 252.0
     else:
         return False
+
 # Boolean functions that check whether the given parameter holds true or not
 def flags_check(register: str) -> bool:
     return register == "FLAGS"
@@ -209,6 +216,22 @@ def A_check(line: list[str], error_ln: str) -> bool:
     else:
         return True
 
+def addf_subf_check(line: list[str], error_ln: str) -> bool:
+    if not float_to_bin(bin_to_float(line[2]) + (bin_to_float(line[3]))):
+        error("402",error_ln)
+    else:
+        return True
+
+def movf_check(line: str, error_ln : str) -> bool:
+    if len(line) !=3:
+        error("204", error_ln)
+    elif not reg_check(line[1]):
+        if flags_check(line[1]):
+            error("203", error_ln)
+        error("201", error_ln)
+    elif not float_check(line[2]):
+        error("401",str(int(error_ln)))
+    return True
 
 #immediate value is not checked, pls fix
 def B_check(line: str, error_ln: str) -> bool:
@@ -222,16 +245,6 @@ def B_check(line: str, error_ln: str) -> bool:
         error("202",str(int(error_ln)))
     return True
 
-def movf_check(line: str, error_ln : str) -> bool:
-    if len(line) !=3:
-        error("204", error_ln)
-    elif not reg_check(line[1]):
-        if flags_check(line[1]):
-            error("203", error_ln)
-        error("201", error_ln)
-    elif not float_check(line[2]):
-        error("205",str(int(error_ln)))
-    return True
 
 def C_check(line: str, error_ln: str) -> bool:
     if len(line) != 3:
@@ -269,7 +282,6 @@ def F_check(line: str, error_ln: str) -> bool:
         error("204", error_ln)
     return True
 
-
 def process():
     """This function converts the parsed data into final assembled opcode into list L."""
     for num in op_dict:
@@ -293,12 +305,15 @@ def process():
                 L.append(op + type_C(line[1], line[2]))
             else:
                 error("204", str(int(num) + 1))
-        #defining exclusively for movf since it would require a lot of tweaking in type_b functions
         elif op == "00010":
-            L.append(op + reg(line[1]) + float_to_bin(line[2][1:])) 
+            movf_check(line,str(int(num) + 1))
+            L.append(op + reg(line[1]) + float_to_bin(line[2][1:]))
         else:
             if type == "A":
-                A_check(line,str(int(num) + 1))
+                if op == "00000" or "00001":
+                    addf_subf_check(line,str(int(num) + 1)) 
+                else:
+                    A_check(line,str(int(num) + 1))
                 L.append(op + type_A(line[1], line[2], line[3]))
             elif type == "B":
                 B_check(line,str(int(num) + 1))
@@ -325,4 +340,3 @@ def main() -> None:
     stdout.close()
 
 main()
-
