@@ -227,7 +227,7 @@ class D:
     def load(self):
         x_axis.append(cycle)
         y_axis.append(self.mem)
-        RF[self.reg] = MEM[self.mem]
+        RF[self.reg] = dec_int(MEM[self.mem])
     
     def store(self):
         x_axis.append(cycle)
