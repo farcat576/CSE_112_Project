@@ -1,5 +1,5 @@
 # CSE_112_Project
-A custom assembler designed and implemented for a given ISA.
+A custom assembler and simulator designed and implemented for a given ISA.
 
 ## Team Members
 Farhan Ali     ([farcat576](https://github.com/farcat576))      CSE 2021045   
