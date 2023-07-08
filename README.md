@@ -2,9 +2,9 @@
 A custom assembler designed and implemented for a given ISA.
 
 ## Team Members
-Farhan Ali     (farcat576)      CSE 2021045   
-Sahil Saraswat (sahilence)      CSE 2021091   
-Anshuman Bunga (AstraTriesGit)  CSE 2021016   
+Farhan Ali     ([farcat576](https://github.com/farcat576))      CSE 2021045   
+Sahil Saraswat ([sahilence](https://github.com/sahilence))      CSE 2021091   
+Anshuman Bunga ([AstraTriesGit](https://github.com/AstraTriesGit))  CSE 2021016   
 
 ## Assembler (Q1)                     
 The assembler has been coded in Python.    
